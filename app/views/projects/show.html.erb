@@ -25,6 +25,19 @@
   </div>
 <% end %>
 
+<% effective = EffectiveConfigComponent.new(config: @effective) %>
+
+<%= render Ui::CardComponent.new(
+      subtitle: 'What Claude Code loads in this directory once the three scopes are resolved.',
+      title: 'Effective configuration'
+    ) do |card| %>
+  <% card.with_footer do %>
+    <%= effective.summary %>
+  <% end %>
+
+  <%= render effective %>
+<% end %>
+
 <% if @overlaps.any? %>
   <%= render Ui::CardComponent.new(accent: 'rose',
                                    subtitle: 'Names this project defines that also exist at user scope.',
@@ -78,24 +91,6 @@
     <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project.path, scope: 'local'),
                                        label: 'Add a local server',
                                        variant: :primary) %>
-  <% end %>
-<% end %>
-
-<%= render Ui::CardComponent.new(accent: 'indigo',
-                                 subtitle: 'Inherited from user scope unless this project overrides them.',
-                                 title: 'Also available here') do %>
-  <% inherited = @user_servers.reject { |server| @overlaps.any? { |overlap| overlap.name == server.name } } %>
-
-  <% if inherited.any? %>
-    <div class="flex flex-wrap gap-1.5">
-      <% inherited.each do |server| %>
-        <%= link_to server.name,
-                    edit_server_path(server.name, scope: 'user'),
-                    class: "font-mono #{accent('indigo', :chip)} rounded-full px-2.5 py-0.5 text-xs hover:underline" %>
-      <% end %>
-    </div>
-  <% else %>
-    <p class="text-sm text-slate-500 dark:text-slate-400">Nothing extra is inherited from user scope.</p>
   <% end %>
 <% end %>
 

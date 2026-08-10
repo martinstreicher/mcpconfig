@@ -6,6 +6,13 @@
       title: "Add a #{@scope.name.downcase}-scoped server"
     ) %>
 
+<%= render ServerImportComponent.new(import: @import, paste: @paste, project: @project, scope: @scope) %>
+
 <%= render Ui::CardComponent.new(accent: @scope.accent, subtitle: @scope.location, title: 'Server') do %>
-  <%= render ServerFormComponent.new(project: @project, scope: @scope, server: @server, url: servers_path) %>
+  <%= render ServerFormComponent.new(conflict: @conflict,
+                                     existing_names: @existing_names || [],
+                                     project: @project,
+                                     scope: @scope,
+                                     server: @server,
+                                     url: servers_path) %>
 <% end %>

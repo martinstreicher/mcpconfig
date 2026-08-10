@@ -46,6 +46,24 @@ RSpec.describe 'Projects' do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('no longer exists')
     end
+
+    it 'leads with what Claude Code actually loads there', :aggregate_failures do
+      get project_path(path: project.to_s)
+
+      expect(response.body).to include('Effective configuration')
+      expect(response.body).to include('3 servers in effect')
+    end
+
+    context 'when a project redefines a server user scope already provides' do
+      before { write_project_config(project, 'mcpServers' => { 'postgres' => stdio_server(command: 'bunx') }) }
+
+      it 'says which definition won', :aggregate_failures do
+        get project_path(path: project.to_s)
+
+        expect(response.body).to include('Overrides user')
+        expect(response.body).to include('1 overridden')
+      end
+    end
   end
 
   describe 'POST /projects' do

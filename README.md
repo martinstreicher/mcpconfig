@@ -9,10 +9,15 @@ Rails 8, ViewComponents and Stimulus, and focused on a single engine.
 ## What it does
 
 - **Web interface** — browse and edit every MCP server without opening a JSON file.
+- **Effective configuration** — per project, the merged list of what Claude Code
+  will actually load, so the precedence maths is done for you rather than by you.
+- **Add by pasting** — a README's JSON snippet, a `claude mcp add` command or a
+  bare command line all fill the add form in. See [Importing](#importing).
 - **Real-time updates** — a file watcher notices changes made by the Claude Code
   CLI or an editor and refreshes open pages in place.
 - **Safe editing** — every write is preceded by a timestamped backup, validated
-  against a JSON Schema, and swapped into place atomically.
+  against a JSON Schema, and swapped into place atomically. A save that would
+  overwrite a name already in use has to say so explicitly.
 - **Overlap detection** — finds server names defined in more than one scope for
   the same project, and says which definition actually wins.
 - **Warnings** — flags servers that are structurally valid but almost certainly
@@ -48,6 +53,30 @@ Scope names match the Claude Code CLI deliberately — what the UI calls "local"
 is what `claude mcp add --scope local` writes. Note that local is the **default**
 when no `--scope` is passed, and that it outranks the other two, which is why
 `/local` exists as its own view.
+
+## Importing
+
+An MCP server is almost never composed from nothing. It is copied — out of a
+README, or off the `claude mcp add` line the same README suggests — so the add
+form takes a paste and fills itself in. Three shapes are understood:
+
+| Paste | Read as |
+| ----- | ------- |
+| `{"mcpServers": {"postgres": {…}}}` | the definitions inside, first one filling the form. `servers` works as the wrapper key too, and a bare `{"command": …}` needs no wrapper at all. |
+| `claude mcp add postgres -- npx -y @mcp/postgres` | name, command, arguments. `--transport`, `--env`, `--header` and `--scope` are all read; `add-json` works as well. |
+| `npx -y @modelcontextprotocol/server-postgres` | command and arguments, with a name suggested from the package. A bare URL becomes an `http` server. |
+
+A missing name is guessed from the package or host — `@mcp/server-github` becomes
+`github` — because the result only populates a form. Nothing is written until the
+form is saved, so a wrong guess costs an edit rather than a bad config.
+
+## Overwriting
+
+Writing a name a scope already holds replaces the definition sitting there, which
+is how the file format works and is sometimes exactly what you want. It is never
+what you want by accident, so the first attempt is refused, and the form comes
+back with the definition at risk and a box to tick. This covers adding, renaming
+onto an existing name, and copying into a scope that already has one.
 
 ## Warnings
 
@@ -107,6 +136,9 @@ app/models/mcp/
   workspace.rb       aggregate root; the only thing controllers talk to
   scope.rb           user / project / local, with precedence and colour
   server.rb          one server definition, with validation and a fingerprint
+  server_import.rb   parses a pasted snippet, CLI line or command into servers
+  effective_config.rb
+                     the three scopes merged for one project, winners first
   json_document.rb   read, backup, validate, atomic write
   user_config.rb     ~/.claude.json
   project_config.rb  <project>/.mcp.json
@@ -125,7 +157,8 @@ lib/mcp_config/watcher.rb
 app/components/
   ui/*               card, badge, button, stat, flash, empty state, page header
   layout/*           sidebar, theme toggle, live status
-  server_*, project_card, overlap_card, backup_card, scope_badge, json_block
+  server_*, effective_config, project_card, overlap_card, backup_card,
+  scope_badge, json_block
 ```
 
 ### Writes

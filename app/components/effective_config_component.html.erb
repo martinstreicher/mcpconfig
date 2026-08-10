@@ -1,0 +1,65 @@
+<% if config.any? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+          <th class="pb-2 pr-3">Server</th>
+          <th class="pb-2 pr-3">What runs</th>
+          <th class="pb-2 pr-3">From</th>
+          <th class="pb-2 text-right">Edit</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        <% config.entries.each do |entry| %>
+          <tr>
+            <td class="max-w-[12rem] py-2 pr-3 align-top">
+              <div class="flex items-center gap-1.5">
+                <span class="truncate font-mono text-sm font-medium text-slate-900 dark:text-slate-50">
+                  <%= entry.name %>
+                </span>
+
+                <% if entry.warnings.any? %>
+                  <%= render Ui::BadgeComponent.new(accent: 'amber',
+                                                    label: entry.warnings.size,
+                                                    title: warning_title(entry)) %>
+                <% end %>
+              </div>
+            </td>
+
+            <td class="max-w-xs py-2 pr-3 align-top">
+              <span class="block truncate font-mono text-xs text-slate-500 dark:text-slate-400"
+                    title="<%= entry.winner.summary %>">
+                <%= entry.winner.summary.presence || 'No command configured' %>
+              </span>
+            </td>
+
+            <td class="py-2 pr-3 align-top">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <%= render ScopeBadgeComponent.new(scope: entry.scope) %>
+
+                <% if entry.contested? %>
+                  <%= link_to entry.note,
+                              overlap_path_for(entry),
+                              class: "rounded-full px-2.5 py-0.5 text-xs font-medium #{accent(note_accent(entry), :chip)}",
+                              title: entry.overlap.summary %>
+                <% end %>
+              </div>
+            </td>
+
+            <td class="py-2 align-top text-right">
+              <%= link_to 'Edit',
+                          edit_path_for(entry),
+                          class: 'text-xs text-slate-500 underline hover:text-slate-800 dark:hover:text-slate-200' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(
+        description: 'Nothing at user scope reaches this project, and it defines nothing of its own.',
+        title: 'Claude Code loads no MCP servers in this directory.'
+      ) %>
+<% end %>

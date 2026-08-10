@@ -1,16 +1,19 @@
-<% content_for :title, "Edit #{@server.name}" %>
+<% content_for :title, "Edit #{@name}" %>
 
 <%= render Ui::PageHeaderComponent.new(
       description: @scope.description,
       eyebrow: @project ? @project.relative_path : 'User scope',
-      title: @server.name
+      title: @name
     ) %>
 
 <%= render Ui::CardComponent.new(accent: @scope.accent, subtitle: @scope.location, title: 'Server') do %>
-  <%= render ServerFormComponent.new(project: @project,
+  <%= render ServerFormComponent.new(conflict: @conflict,
+                                     existing_names: @existing_names || [],
+                                     original_name: @name,
+                                     project: @project,
                                      scope: @scope,
                                      server: @server,
-                                     url: server_path(@server.name, project: @project&.path, scope: @scope.key)) %>
+                                     url: server_path(@name, project: @project&.path, scope: @scope.key)) %>
 <% end %>
 
 <%= render Ui::CardComponent.new(subtitle: 'Exactly what will be written for this server.', title: 'JSON') do %>

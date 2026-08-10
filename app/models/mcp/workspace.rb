@@ -37,8 +37,13 @@ module Mcp
       end
     end
 
+    # The merged, precedence-resolved view of one project.
+    def effective_config(project)
+      EffectiveConfig.new(project: project, user_servers: user_servers)
+    end
+
     def find_server!(name, scope:, project_path: nil)
-      servers_for(scope: scope, project_path: project_path).find { |server| server.name == name } ||
+      server_named(name, scope: scope, project_path: project_path) ||
         raise(NotFoundError, "no #{scope} MCP server named #{name.inspect}")
     end
 
@@ -86,6 +91,16 @@ module Mcp
       end
 
       server
+    end
+
+    # The server already stored under this name in one scope, if there is one.
+    # Saving over it replaces it, so callers ask before writing.
+    def server_named(name, scope:, project_path: nil)
+      scope = Scope.fetch(scope)
+      return nil if name.blank?
+      return nil if scope.project_specific? && project_path.blank?
+
+      servers_for(scope: scope, project_path: project_path).find { |server| server.name == name }
     end
 
     def servers_for(scope:, project_path: nil)
