@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html class="<%= 'dark' if current_theme == 'dark' %>" data-theme="<%= current_theme %>" lang="en">
+  <head>
+    <title><%= content_for(:title) || 'MCP Config' %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%# Turbo morphs the page in when the watcher broadcasts a refresh, so the
+        scroll position and any focused input survive a change on disk. %>
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+
+    <%# Resolves the "system" theme before first paint to avoid a flash. %>
+    <script>
+      (function () {
+        var root = document.documentElement
+        if (root.dataset.theme !== 'system') return
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) root.classList.add('dark')
+      })()
+    </script>
+
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+    <%= stylesheet_link_tag 'tailwind', 'data-turbo-track': 'reload' %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="min-h-screen bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100"
+        data-controller="theme"
+        data-theme-choice-value="<%= current_theme %>">
+    <%= turbo_stream_from Mcp::ChangeNotifier::STREAM %>
+
+    <div class="mx-auto flex max-w-7xl gap-6 px-4 py-6 lg:px-8">
+      <aside class="hidden w-56 shrink-0 lg:block">
+        <div class="sticky top-6">
+          <%= link_to root_path, class: 'flex items-center gap-2 px-3 pb-5' do %>
+            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white dark:bg-slate-100 dark:text-slate-900">M</span>
+            <span class="text-sm font-semibold">MCP Config</span>
+          <% end %>
+
+          <%= render Layout::SidebarComponent.new(overlap_count: workspace.overlap_report.counts[:total],
+                                                  request_path: request.path) %>
+        </div>
+      </aside>
+
+      <main class="min-w-0 flex-1 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <%= render Layout::LiveStatusComponent.new %>
+          <%= render Layout::ThemeToggleComponent.new(current: current_theme) %>
+        </div>
+
+        <%= render Ui::FlashComponent.new(flash: flash) %>
+
+        <%= yield %>
+      </main>
+    </div>
+  </body>
+</html>

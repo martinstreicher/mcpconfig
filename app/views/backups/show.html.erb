@@ -1,0 +1,48 @@
+<% content_for :title, "Backup #{@backup.created_at.to_fs(:long)}" %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: @backup.source_path.to_s,
+      eyebrow: 'Backup',
+      title: @backup.created_at.to_fs(:long)
+    ) do |header| %>
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: backups_path, label: 'All backups', variant: :ghost) %>
+  <% end %>
+
+  <% header.with_action do %>
+    <%= button_to 'Restore this version',
+                  restore_backup_path(@backup),
+                  class: 'inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white',
+                  form: { data: { turbo_confirm: 'Overwrite the current file with this backup? The current file is backed up first.' } } %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(subtitle: "#{number_to_human_size(@backup.byte_size)} captured", title: 'MCP servers in this backup') do %>
+  <% if @backup.server_names.any? %>
+    <div class="flex flex-wrap gap-1.5">
+      <% @backup.server_names.each do |name| %>
+        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300"><%= name %></span>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-slate-500 dark:text-slate-400">This backup defines no MCP servers.</p>
+  <% end %>
+<% end %>
+
+<% if (parsed = @backup.parsed_contents) %>
+  <%= render Ui::CardComponent.new(subtitle: 'Only the MCP fragments are shown.', title: 'Contents') do %>
+    <div class="space-y-4">
+      <%= render JsonBlockComponent.new(label: 'User scope', value: parsed.fetch('mcpServers', {})) %>
+
+      <% parsed.fetch('projects', {}).each do |path, entry| %>
+        <% next if entry.fetch('mcpServers', {}).blank? %>
+
+        <%= render JsonBlockComponent.new(label: path, value: entry.fetch('mcpServers', {})) %>
+      <% end %>
+    </div>
+  <% end %>
+<% else %>
+  <%= render Ui::CardComponent.new(title: 'Contents') do %>
+    <%= render JsonBlockComponent.new(value: @backup.contents) %>
+  <% end %>
+<% end %>

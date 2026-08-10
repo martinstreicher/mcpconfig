@@ -1,0 +1,120 @@
+<% content_for :title, @project.display_name %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: @project.path,
+      eyebrow: 'Project',
+      title: @project.display_name
+    ) do |header| %>
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project.path, scope: 'project'),
+                                       label: 'Add to .mcp.json',
+                                       variant: :primary) %>
+  <% end %>
+
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project.path, scope: 'local'),
+                                       label: 'Add local',
+                                       variant: :secondary) %>
+  <% end %>
+<% end %>
+
+<% unless @project.directory? %>
+  <div class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+    This directory no longer exists. Local-scope servers can still be edited, but a
+    <code>.mcp.json</code> cannot be written until the directory is back.
+  </div>
+<% end %>
+
+<% if @overlaps.any? %>
+  <%= render Ui::CardComponent.new(accent: 'rose',
+                                   subtitle: 'Names this project defines that also exist at user scope.',
+                                   title: "#{pluralize(@overlaps.size, 'overlap')} with user scope") do %>
+    <div class="space-y-3">
+      <% @overlaps.each do |overlap| %>
+        <%= render OverlapCardComponent.new(overlap: overlap, show_project: false) %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(accent: 'emerald',
+                                 subtitle: Mcp::Scope.project.location,
+                                 title: 'Project servers (.mcp.json)') do |card| %>
+  <% card.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: raw_config_path(project: @project.path, scope: 'project'),
+                                       label: 'Raw JSON',
+                                       variant: :ghost) %>
+  <% end %>
+
+  <%= render ServerListComponent.new(
+        empty_description: 'Servers here are committed with the repository and shared with everyone who works on it.',
+        empty_title: 'This project has no .mcp.json servers.',
+        overlaps: @overlaps,
+        servers: @project.project_servers,
+        show_scope: false
+      ) do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project.path, scope: 'project'),
+                                       label: 'Add a shared server',
+                                       variant: :primary) %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(accent: 'amber',
+                                 subtitle: Mcp::Scope.local.location,
+                                 title: 'Local servers') do |card| %>
+  <% card.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: raw_config_path(project: @project.path, scope: 'local'),
+                                       label: 'Raw JSON',
+                                       variant: :ghost) %>
+  <% end %>
+
+  <%= render ServerListComponent.new(
+        empty_description: 'Local servers stay on this machine and are never committed.',
+        empty_title: 'No local servers for this project.',
+        overlaps: @overlaps,
+        servers: @project.local_servers,
+        show_scope: false
+      ) do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project.path, scope: 'local'),
+                                       label: 'Add a local server',
+                                       variant: :primary) %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(accent: 'indigo',
+                                 subtitle: 'Inherited from user scope unless this project overrides them.',
+                                 title: 'Also available here') do %>
+  <% inherited = @user_servers.reject { |server| @overlaps.any? { |overlap| overlap.name == server.name } } %>
+
+  <% if inherited.any? %>
+    <div class="flex flex-wrap gap-1.5">
+      <% inherited.each do |server| %>
+        <%= link_to server.name,
+                    edit_server_path(server.name, scope: 'user'),
+                    class: "font-mono #{accent('indigo', :chip)} rounded-full px-2.5 py-0.5 text-xs hover:underline" %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Nothing extra is inherited from user scope.</p>
+  <% end %>
+<% end %>
+
+<% if @project.enabled_mcpjson_servers.any? || @project.disabled_mcpjson_servers.any? %>
+  <%= render Ui::CardComponent.new(subtitle: 'Approvals Claude Code recorded for this project.', title: '.mcp.json approvals') do %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">Enabled</p>
+        <p class="mt-1 font-mono text-xs text-slate-600 dark:text-slate-300">
+          <%= @project.enabled_mcpjson_servers.presence&.join(', ') || '—' %>
+        </p>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">Disabled</p>
+        <p class="mt-1 font-mono text-xs text-slate-600 dark:text-slate-300">
+          <%= @project.disabled_mcpjson_servers.presence&.join(', ') || '—' %>
+        </p>
+      </div>
+    </div>
+  <% end %>
+<% end %>

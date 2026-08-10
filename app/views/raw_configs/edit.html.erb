@@ -1,0 +1,42 @@
+<% content_for :title, 'Edit raw JSON' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Replaces the whole mcpServers block for this scope. A backup is taken before the write, ' \
+                   'and the result is schema-checked before it lands.',
+      eyebrow: @project ? @project.relative_path : 'User scope',
+      title: "Edit #{@scope.name.downcase} scope JSON"
+    ) %>
+
+<%= render Ui::CardComponent.new(accent: @scope.accent, subtitle: @scope.location, title: 'mcpServers') do %>
+  <%= form_with data: { controller: 'json-editor' },
+                method: :patch,
+                url: raw_config_path(project: @project&.path, scope: @scope.key) do %>
+    <%= hidden_field_tag :scope, @scope.key %>
+    <%= hidden_field_tag :project, @project&.path if @project %>
+
+    <%= text_area_tag :contents,
+                      @contents || @document,
+                      class: 'w-full rounded-lg border-slate-300 bg-white p-3 font-mono text-xs leading-relaxed shadow-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100',
+                      data: { action: 'input->json-editor#validate', json_editor_target: 'input' },
+                      rows: 24,
+                      spellcheck: false %>
+
+    <p class="mt-2 text-xs" data-json-editor-target="status"></p>
+
+    <div class="mt-4 flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+      <%= submit_tag 'Save JSON',
+                     class: 'inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white',
+                     data: { json_editor_target: 'submit' } %>
+
+      <button class="inline-flex items-center rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              data-action="json-editor#format"
+              type="button">
+        Reformat
+      </button>
+
+      <%= render Ui::ButtonComponent.new(href: raw_config_path(project: @project&.path, scope: @scope.key),
+                                         label: 'Cancel',
+                                         variant: :ghost) %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Dark mode is class-driven so the server can render the right theme on the
+     first paint instead of waiting for a media query to settle. */
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  code,
+  pre {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+}
+
+@layer components {
+  /* Form controls come from @tailwindcss/forms; these pull them into the palette
+     the rest of the app uses so every input matches without repeating a dozen
+     utility classes at each call site. */
+  input[type="text"],
+  input[type="search"],
+  select,
+  textarea {
+    @apply border-slate-300 text-slate-900 placeholder:text-slate-400;
+    @apply focus:border-slate-500 focus:ring-slate-500;
+  }
+
+  .dark input[type="text"],
+  .dark input[type="search"],
+  .dark select,
+  .dark textarea {
+    @apply border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500;
+    @apply focus:border-slate-400 focus:ring-slate-400;
+  }
+}

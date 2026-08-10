@@ -1,0 +1,18 @@
+<% body = capture do %>
+  <div class="h-1 <%= accent(accent_name, :bar) %>"></div>
+
+  <div class="px-4 py-3">
+    <p class="text-xs font-semibold uppercase tracking-wide <%= accent(accent_name, :text) %>"><%= label %></p>
+    <p class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-50"><%= value %></p>
+
+    <% if hint.present? %>
+      <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"><%= hint %></p>
+    <% end %>
+  </div>
+<% end %>
+
+<% if href.present? %>
+  <%= link_to body, href, class: "block overflow-hidden rounded-xl border transition-shadow hover:shadow-md #{accent(accent_name, :border)} #{accent(accent_name, :soft)}" %>
+<% else %>
+  <div class="overflow-hidden rounded-xl border <%= accent(accent_name, :border) %> <%= accent(accent_name, :soft) %>"><%= body %></div>
+<% end %>

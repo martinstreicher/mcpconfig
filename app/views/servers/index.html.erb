@@ -1,0 +1,33 @@
+<% content_for :title, "#{@scope.name} MCP servers" %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: @scope.description,
+      eyebrow: @project ? @project.relative_path : 'User scope',
+      title: "#{@scope.name} servers"
+    ) do |header| %>
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: raw_config_path(project: @project&.path, scope: @scope.key),
+                                       label: 'Raw JSON',
+                                       variant: :secondary) %>
+  <% end %>
+
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project&.path, scope: @scope.key),
+                                       label: 'Add server',
+                                       variant: :primary) %>
+  <% end %>
+<% end %>
+
+<p class="font-mono text-xs text-slate-400 dark:text-slate-500"><%= @scope.location %></p>
+
+<%= render ServerListComponent.new(
+      empty_description: @scope.description,
+      empty_title: "No servers defined at #{@scope.name.downcase} scope.",
+      overlaps: @overlaps || [],
+      servers: @servers,
+      show_scope: false
+    ) do %>
+  <%= render Ui::ButtonComponent.new(href: new_server_path(project: @project&.path, scope: @scope.key),
+                                     label: 'Add a server',
+                                     variant: :primary) %>
+<% end %>

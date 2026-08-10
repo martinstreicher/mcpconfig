@@ -1,0 +1,29 @@
+<% if servers.empty? %>
+  <%= render Ui::EmptyStateComponent.new(description: empty_description, title: empty_title) do %>
+    <%= content %>
+  <% end %>
+<% else %>
+  <div data-controller="filter">
+    <% if filterable? %>
+      <div class="mb-3">
+        <input class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+               data-action="input->filter#apply"
+               data-filter-target="query"
+               placeholder="Filter servers…"
+               type="search">
+      </div>
+    <% end %>
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <% servers.each do |server| %>
+        <div data-filter-target="item" data-filter-text="<%= [server.name, server.summary, server.scope.name].join(' ').downcase %>">
+          <%= render ServerCardComponent.new(overlap: overlap_for(server), server: server, show_scope: show_scope) %>
+        </div>
+      <% end %>
+    </div>
+
+    <p class="mt-3 hidden text-sm text-slate-500 dark:text-slate-400" data-filter-target="empty">
+      No servers match that filter.
+    </p>
+  </div>
+<% end %>

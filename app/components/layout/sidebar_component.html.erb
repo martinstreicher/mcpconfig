@@ -1,0 +1,30 @@
+<nav class="space-y-1" aria-label="Primary">
+  <% sections.each do |section| %>
+    <%= link_to section[:path], class: link_classes(section[:path]) do %>
+      <span><%= section[:label] %></span>
+
+      <% if section[:badge].to_i.positive? %>
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+          <%= section[:badge] %>
+        </span>
+      <% end %>
+    <% end %>
+  <% end %>
+</nav>
+
+<div class="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
+  <p class="px-3 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Scopes</p>
+
+  <ul class="mt-2 space-y-2 px-3">
+    <% Mcp::Scope.all.each do |scope| %>
+      <li>
+        <div class="flex items-center gap-2">
+          <span class="h-1.5 w-1.5 rounded-full <%= accent(scope.accent, :bar) %>"></span>
+          <span class="text-xs font-medium text-slate-700 dark:text-slate-200"><%= scope.name %></span>
+        </div>
+
+        <p class="mt-0.5 font-mono text-[11px] leading-tight text-slate-400 dark:text-slate-500"><%= scope.location %></p>
+      </li>
+    <% end %>
+  </ul>
+</div>

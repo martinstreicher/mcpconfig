@@ -1,0 +1,28 @@
+<% content_for :title, 'Backups' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: "A copy of every file this app has overwritten, taken immediately before the write. " \
+                   "Kept in #{Mcp::Backup.root}.",
+      eyebrow: 'Backups',
+      title: 'Backups'
+    ) %>
+
+<% if @grouped.any? %>
+  <% @grouped.each do |source_path, backups| %>
+    <%= render Ui::CardComponent.new(padded: false, subtitle: source_path.to_s, title: source_path.basename.to_s) do |card| %>
+      <% card.with_footer do %>
+        <%= pluralize(backups.size, 'backup') %> ·
+        oldest <%= time_ago_in_words(backups.last.created_at) %> ago
+      <% end %>
+
+      <% backups.each_with_index do |backup, index| %>
+        <%= render BackupCardComponent.new(backup: backup, latest: index.zero?) %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(
+        description: 'One will be taken automatically the first time you save a change.',
+        title: 'No backups yet.'
+      ) %>
+<% end %>

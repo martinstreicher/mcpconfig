@@ -1,0 +1,116 @@
+<% content_for :title, 'MCP Config' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Read and edit the MCP servers Claude Code loads, at user scope and per project.',
+      eyebrow: 'Overview',
+      title: 'MCP configuration'
+    ) do |header| %>
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(scope: 'user'), label: 'Add user server', variant: :primary) %>
+  <% end %>
+<% end %>
+
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <%= render Ui::StatComponent.new(accent: 'indigo',
+                                   hint: 'available everywhere',
+                                   href: servers_path(scope: 'user'),
+                                   label: 'User servers',
+                                   value: @stats[:user_servers]) %>
+
+  <%= render Ui::StatComponent.new(accent: 'emerald',
+                                   hint: 'with MCP servers of their own',
+                                   href: projects_path,
+                                   label: 'Projects',
+                                   value: @stats[:projects]) %>
+
+  <%= render Ui::StatComponent.new(accent: @stats[:overlaps].positive? ? 'rose' : 'slate',
+                                   hint: 'names defined in two scopes',
+                                   href: overlaps_path,
+                                   label: 'Overlaps',
+                                   value: @stats[:overlaps]) %>
+
+  <%= render Ui::StatComponent.new(accent: 'slate',
+                                   hint: 'taken before every write',
+                                   href: backups_path,
+                                   label: 'Backups',
+                                   value: @stats[:backups]) %>
+</div>
+
+<% if workspace.user_config.parse_error %>
+  <div class="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
+    <p class="font-medium"><%= workspace.user_config.path %> could not be parsed.</p>
+    <p class="mt-1 font-mono text-xs"><%= workspace.user_config.parse_error %></p>
+    <p class="mt-2">Editing is disabled until the file is valid JSON. A backup may help — see <%= link_to 'Backups', backups_path, class: 'underline' %>.</p>
+  </div>
+<% end %>
+
+<% if @overlap_report.any? %>
+  <%= render Ui::CardComponent.new(accent: 'rose',
+                                   subtitle: 'The same server name defined in more than one scope for a project.',
+                                   title: 'Overlaps needing attention') do |card| %>
+    <% card.with_action do %>
+      <%= render Ui::ButtonComponent.new(href: overlaps_path, label: 'See all', variant: :secondary) %>
+    <% end %>
+
+    <div class="space-y-3">
+      <% @overlap_report.overrides.first(3).each do |overlap| %>
+        <%= render OverlapCardComponent.new(overlap: overlap) %>
+      <% end %>
+
+      <% if @overlap_report.overrides.empty? %>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          <%= pluralize(@overlap_report.duplicates.size, 'duplicate') %> found, but nothing conflicts —
+          every repeated definition matches the one it shadows.
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(accent: 'indigo',
+                                 subtitle: Mcp::Scope.user.location,
+                                 title: 'User servers') do |card| %>
+  <% card.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: raw_config_path(scope: 'user'), label: 'Raw JSON', variant: :ghost) %>
+  <% end %>
+
+  <% card.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(scope: 'user'), label: 'Add', variant: :secondary) %>
+  <% end %>
+
+  <%= render ServerListComponent.new(
+        empty_description: 'Servers added here are available to Claude Code in every project.',
+        empty_title: 'No user-scoped MCP servers.',
+        servers: @user_servers,
+        show_scope: false
+      ) do %>
+    <%= render Ui::ButtonComponent.new(href: new_server_path(scope: 'user'), label: 'Add your first server', variant: :primary) %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(accent: 'emerald',
+                                 subtitle: 'Projects that define MCP servers of their own.',
+                                 title: 'Projects') do |card| %>
+  <% card.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: projects_path, label: 'All projects', variant: :ghost) %>
+  <% end %>
+
+  <% if @projects.any? %>
+    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <% @projects.first(9).each do |project| %>
+        <%= render ProjectCardComponent.new(overlaps: @overlap_report.for_project(project), project: project) %>
+      <% end %>
+    </div>
+
+    <% if @projects.size > 9 %>
+      <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">
+        <%= link_to "and #{@projects.size - 9} more", projects_path, class: 'underline' %>
+      </p>
+    <% end %>
+  <% else %>
+    <%= render Ui::EmptyStateComponent.new(
+          description: 'A project shows up here once it has a .mcp.json or a local server in ~/.claude.json.',
+          title: 'No project-scoped MCP servers yet.'
+        ) %>
+  <% end %>
+<% end %>
