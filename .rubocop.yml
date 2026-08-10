@@ -1,9 +1,7 @@
 plugins:
+  - rubocop-ordered_methods
   - rubocop-rails
   - rubocop-rspec
-
-require:
-  - rubocop-ordered_methods
 
 AllCops:
   NewCops: enable

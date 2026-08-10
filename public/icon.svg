@@ -1,3 +1,18 @@
-<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="256" cy="256" r="256" fill="red"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- The sidebar wordmark, drawn as a path so it renders without a font and
+       inverts with the OS theme the way `dark:bg-slate-100` does in the app. -->
+  <style>
+    .plate { fill: #0f172a }
+    .mark { stroke: #ffffff }
+
+    @media (prefers-color-scheme: dark) {
+      .plate { fill: #f1f5f9 }
+      .mark { stroke: #0f172a }
+    }
+  </style>
+
+  <rect class="plate" width="512" height="512" rx="146"/>
+
+  <polyline class="mark" points="132,344 132,168 256,296 380,168 380,344"
+            fill="none" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
