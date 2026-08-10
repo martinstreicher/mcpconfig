@@ -20,6 +20,10 @@
       })()
     </script>
 
+    <%# Safari ignores SVG favicons and falls back to requesting /favicon.ico,
+        so the .ico ships alongside the SVG to keep that request off the 404
+        path. Browsers that understand the SVG still prefer it. %>
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
 
     <%= stylesheet_link_tag 'tailwind', 'data-turbo-track': 'reload' %>
