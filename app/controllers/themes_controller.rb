@@ -3,6 +3,6 @@ class ThemesController < ApplicationController
     choice = params[:theme].to_s
     cookies[:theme] = { httponly: false, same_site: :lax, value: choice } if Theme.valid?(choice)
 
-    redirect_back fallback_location: root_path
+    redirect_back_or_to(root_path)
   end
 end

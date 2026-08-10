@@ -15,14 +15,15 @@ gem 'view_component'
 
 group :development, :test do
   gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
+  gem 'rspec-rails'
+  gem 'rubocop', require: false
+  gem 'rubocop-ordered_methods', require: false
+  gem 'rubocop-rails', require: false
+  gem 'rubocop-rspec', require: false
 end
 
 group :development do
   gem 'web-console'
-end
-
-group :development, :test do
-  gem 'rspec-rails'
 end
 
 group :test do

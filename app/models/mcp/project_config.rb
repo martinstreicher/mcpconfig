@@ -49,9 +49,11 @@ module Mcp
     end
 
     def servers
-      raw_servers.map do |name, config|
+      built = raw_servers.map do |name, config|
         Server.from_config(name, config, project_path: project_path.to_s, scope: Scope.project)
-      end.sort_by { |server| server.name.downcase }
+      end
+
+      built.sort_by { |server| server.name.downcase }
     end
 
     def upsert_server(server, previous_name: nil)

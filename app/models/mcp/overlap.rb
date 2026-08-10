@@ -36,12 +36,6 @@ module Mcp
       status == :duplicate
     end
 
-    # Definitions that are present but never used, because a higher-precedence
-    # scope defines the same name.
-    def shadowed
-      servers.drop(1)
-    end
-
     def id
       [project.path, name].join('::')
     end
@@ -60,18 +54,20 @@ module Mcp
       crosses_user_and_project? ? :warning : :notice
     end
 
+    # Definitions that are present but never used, because a higher-precedence
+    # scope defines the same name.
+    def shadowed
+      servers.drop(1)
+    end
+
     def status
       @status ||= servers.map(&:fingerprint).uniq.size == 1 ? :duplicate : :override
     end
 
     def summary
-      if duplicate?
-        "Defined identically in #{scope_names.to_sentence}. The #{winner.scope.name.downcase} copy wins; " \
-          'the others are redundant.'
-      else
-        "#{winner.scope.name} overrides #{shadowed.map { |s| s.scope.name.downcase }.to_sentence} " \
-          "for #{differences.map { |d| d[:field] }.to_sentence}."
-      end
+      return duplicate_summary if duplicate?
+
+      override_summary
     end
 
     # The definition Claude Code actually uses: highest precedence wins.
@@ -80,6 +76,18 @@ module Mcp
     end
 
     private
+
+    def duplicate_summary
+      "Defined identically in #{scope_names.to_sentence}. The #{winner.scope.name.downcase} copy wins; " \
+        'the others are redundant.'
+    end
+
+    def override_summary
+      shadowed_names = shadowed.map { |server| server.scope.name.downcase }
+
+      "#{winner.scope.name} overrides #{shadowed_names.to_sentence} " \
+        "for #{differences.pluck(:field).to_sentence}."
+    end
 
     def scope_names
       scopes.map(&:name)

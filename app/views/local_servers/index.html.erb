@@ -1,23 +1,25 @@
 <% content_for :title, 'Local servers' %>
 
 <%= render Ui::PageHeaderComponent.new(
-      description: 'Servers stored per project path in ~/.claude.json. They are private to you, ' \
-                   'invisible in the repository, and outrank both other scopes — and they are what ' \
+      description: "Servers stored per project path in #{Mcp::Scope.user_config_display}. They are private " \
+                   'to you, invisible in the repository, and outrank both other scopes — and they are what ' \
                    '`claude mcp add` writes when you do not pass --scope.',
       eyebrow: 'Local scope',
       title: 'Local servers'
     ) %>
 
 <div class="grid gap-3 sm:grid-cols-3">
+  <% warned = @servers.count { |server| server.warnings.any? } %>
+
   <%= render Ui::StatComponent.new(accent: 'amber',
                                    hint: "across #{pluralize(@groups.size, 'project')}",
                                    label: 'Local servers',
-                                   value: @total) %>
+                                   value: @servers.size) %>
 
-  <%= render Ui::StatComponent.new(accent: @warned.positive? ? 'rose' : 'slate',
+  <%= render Ui::StatComponent.new(accent: warned.positive? ? 'rose' : 'slate',
                                    hint: 'misconfigured or storing a literal secret',
                                    label: 'With warnings',
-                                   value: @warned) %>
+                                   value: warned) %>
 
   <%= render Ui::StatComponent.new(accent: 'indigo',
                                    hint: 'shadowing another scope',

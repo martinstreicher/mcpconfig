@@ -1,0 +1,18 @@
+{
+  "config": {
+    // Match the Ruby line length so prose and code agree.
+    "MD013": { "line_length": 120, "tables": false, "code_blocks": false },
+
+    // Padding table pipes into columns is cosmetic and does not survive
+    // editing a single cell. Content correctness is what matters here.
+    "MD060": false
+  },
+  "globs": [
+    "**/*.md",
+    "!.context/**",
+    "!.local-gems/**",
+    "!node_modules/**",
+    "!tmp/**",
+    "!vendor/**"
+  ]
+}

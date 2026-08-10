@@ -109,7 +109,8 @@
     <% end %>
   <% else %>
     <%= render Ui::EmptyStateComponent.new(
-          description: 'A project shows up here once it has a .mcp.json or a local server in ~/.claude.json.',
+          description: 'A project shows up here once it has a .mcp.json or a local server in ' \
+                       "#{Mcp::Scope.user_config_display}.",
           title: 'No project-scoped MCP servers yet.'
         ) %>
   <% end %>

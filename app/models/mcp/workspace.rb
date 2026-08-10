@@ -58,6 +58,12 @@ module Mcp
       @projects ||= user_config.project_paths.map { |path| project(path) }
     end
 
+    # Projects that define at least one local-scope server, busiest first.
+    def projects_with_local_servers
+      projects.reject { |project| project.local_servers.empty? }
+              .sort_by { |project| [-project.local_servers.size, project.path.downcase] }
+    end
+
     # Only the projects that have something to show, which is what the UI leads
     # with — a machine with 90 remembered project paths and 3 real MCP setups
     # should not open on 90 empty cards.

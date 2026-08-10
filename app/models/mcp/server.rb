@@ -72,7 +72,7 @@ module Mcp
       @project_path = attributes.delete(:project_path)
       @scope = attributes.delete(:scope)
 
-      super(attributes)
+      super
     end
 
     # Identity used to decide whether two definitions of the same name are the
@@ -110,17 +110,8 @@ module Mcp
     end
 
     def to_config
-      config = extras.deep_dup
-      config['type'] = transport
-
-      if remote?
-        config['url'] = url
-        config['headers'] = headers if headers.present?
-      else
-        config['command'] = command
-        config['args'] = args if args.present?
-        config['env'] = env if env.present?
-      end
+      config = extras.deep_dup.merge('type' => transport)
+      config.merge!(remote? ? remote_config : stdio_config)
 
       config.sort.to_h
     end
@@ -170,6 +161,21 @@ module Mcp
           suggestion: "Use ${#{key}} to read it from the environment instead of storing it here."
         )
       end
+    end
+
+    def remote_config
+      config = { 'url' => url }
+      config['headers'] = headers if headers.present?
+
+      config
+    end
+
+    def stdio_config
+      config = { 'command' => command }
+      config['args'] = args if args.present?
+      config['env'] = env if env.present?
+
+      config
     end
 
     # A stdio server execs its command. A URL there fails at launch, and almost

@@ -75,7 +75,7 @@ bin/rails tailwindcss:build
 bin/dev                       # web server + Tailwind watcher
 ```
 
-Then open http://localhost:3000.
+Then open <http://localhost:3000>.
 
 Run the tests:
 
@@ -102,7 +102,7 @@ Pointing `MCP_CONFIG_USER_FILE` at a copy is the safest way to try the app out.
 
 There is **no database**. The JSON files on disk are the only state.
 
-```
+```text
 app/models/mcp/
   workspace.rb       aggregate root; the only thing controllers talk to
   scope.rb           user / project / local, with precedence and colour

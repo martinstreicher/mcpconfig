@@ -20,6 +20,39 @@ RSpec.describe 'Servers' do
     end
   end
 
+  # These three render-only actions had no coverage until a missing helper
+  # method took two of them down in development without a single spec failing.
+  describe 'the forms' do
+    before { write_user_config('mcpServers' => { 'postgres' => stdio_server(command: 'npx') }) }
+
+    it 'renders the new-server form' do
+      get new_server_path(scope: 'user')
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'renders the edit form' do
+      get edit_server_path('postgres', scope: 'user')
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'renders the copy form with the other scopes offered', :aggregate_failures do
+      get copy_server_path('postgres', scope: 'user')
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Project').and include('Local')
+    end
+
+    it 'renders the new-server form for a project scope' do
+      write_user_config('projects' => { project.to_s => {} })
+
+      get new_server_path(project: project.to_s, scope: 'project')
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe 'POST /servers' do
     before { write_user_config({}) }
 
@@ -94,14 +127,18 @@ RSpec.describe 'Servers' do
     end
 
     it 'takes a backup before changing anything' do
-      expect { patch server_path('postgres', scope: 'user'), params: { scope: 'user', server: { command: 'bunx', name: 'postgres' } } }
+      expect do
+        patch server_path('postgres', scope: 'user'),
+              params: { scope: 'user', server: { command: 'bunx', name: 'postgres' } }
+      end
         .to change { Mcp::Backup.all.size }.by(1)
     end
   end
 
   describe 'DELETE /servers/:name' do
     before do
-      write_user_config('mcpServers' => { 'keep' => stdio_server(command: 'npx'), 'postgres' => stdio_server(command: 'npx') })
+      write_user_config('mcpServers' => { 'keep' => stdio_server(command: 'npx'),
+                                          'postgres' => stdio_server(command: 'npx') })
     end
 
     it 'removes only the named server' do

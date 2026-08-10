@@ -68,7 +68,7 @@ module Mcp
     # Filesystem-safe stand-in for the full source path, so backups of two files
     # with the same basename never collide.
     def self.slug(source_path)
-      source_path.to_s.delete_prefix(Dir.home).gsub(%r{[^a-zA-Z0-9]+}, '-').delete_prefix('-').presence || 'config'
+      source_path.to_s.delete_prefix(Dir.home).gsub(/[^a-zA-Z0-9]+/, '-').delete_prefix('-').presence || 'config'
     end
 
     attr_reader :contents, :created_at, :path, :source_path
@@ -103,7 +103,7 @@ module Mcp
       source_path.dirname.mkpath
       source_path.write(contents)
 
-      true
+      self
     end
 
     def save

@@ -9,7 +9,8 @@ RSpec.describe 'Local servers' do
       write_user_config(
         'mcpServers' => { 'postgres' => stdio_server(command: 'npx') },
         'projects' => {
-          one.to_s => { 'mcpServers' => { 'figma' => { 'type' => 'stdio', 'command' => 'http://127.0.0.1:3845/mcp' } } },
+          one.to_s => { 'mcpServers' => { 'figma' => { 'type' => 'stdio',
+                                                       'command' => 'http://127.0.0.1:3845/mcp' } } },
           two.to_s => { 'mcpServers' => { 'sentry' => stdio_server(command: 'npx') } }
         }
       )

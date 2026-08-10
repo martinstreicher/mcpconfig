@@ -5,7 +5,8 @@ RSpec.describe 'Backups' do
     write_user_config('mcpServers' => { 'postgres' => stdio_server(command: 'npx') })
 
     # One edit, so exactly one backup of the original exists.
-    patch server_path('postgres', scope: 'user'), params: { scope: 'user', server: { command: 'bunx', name: 'postgres' } }
+    patch server_path('postgres', scope: 'user'),
+          params: { scope: 'user', server: { command: 'bunx', name: 'postgres' } }
   end
 
   describe 'GET /backups' do

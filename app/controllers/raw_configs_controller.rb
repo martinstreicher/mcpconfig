@@ -16,13 +16,7 @@ class RawConfigsController < ApplicationController
   end
 
   def update
-    parsed = JSON.parse(params.require(:contents))
-    raise JSON::ParserError, 'expected a JSON object of server names' unless parsed.is_a?(Hash)
-
-    errors = Mcp::Schema.errors_for(:server_map, parsed)
-    raise Mcp::ValidationError, errors if errors.any?
-
-    write(parsed)
+    write(parsed_servers)
     Mcp::ChangeLog.record([source_path], source: :app)
 
     redirect_to raw_config_path(project: @project&.path, scope: @scope.key),
@@ -52,6 +46,17 @@ class RawConfigsController < ApplicationController
 
   def document_for_display
     JSON.pretty_generate(raw_servers)
+  end
+
+  # Parses and schema-checks the submitted block before anything is written.
+  def parsed_servers
+    parsed = JSON.parse(params.expect(:contents))
+    raise JSON::ParserError, 'expected a JSON object of server names' unless parsed.is_a?(Hash)
+
+    errors = Mcp::Schema.errors_for(:server_map, parsed)
+    raise Mcp::ValidationError, errors if errors.any?
+
+    parsed
   end
 
   def raw_servers

@@ -15,7 +15,8 @@
 
       <% if missing_directory? %>
         <%= render Ui::BadgeComponent.new(accent: 'slate', label: 'Not on disk',
-                                          title: 'This path is remembered in ~/.claude.json but no longer exists.') %>
+                                          title: "This path is remembered in #{Mcp::Scope.user_config_display} " \
+                                                 'but no longer exists.') %>
       <% end %>
     </div>
 

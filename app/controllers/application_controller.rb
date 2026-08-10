@@ -23,8 +23,7 @@ class ApplicationController < ActionController::Base
   end
 
   def render_invalid(error)
-    redirect_back fallback_location: root_path,
-                  alert: "That change was rejected: #{error.messages.first(3).to_sentence}"
+    redirect_back_or_to(root_path, alert: "That change was rejected: #{error.messages.first(3).to_sentence}")
   end
 
   def render_not_found(error)

@@ -12,16 +12,16 @@ class OverlapCardComponent < ApplicationComponent
     overlap.duplicate? ? 'slate' : 'rose'
   end
 
-  def edit_path_for(server)
-    helpers.edit_server_path(server.name, project: server.project_path, scope: server.scope.key)
-  end
-
   def display_value(value)
     return '—' if value.blank?
     return value.join(' ') if value.is_a?(Array)
     return value.map { |key, entry| "#{key}=#{entry}" }.join(', ') if value.is_a?(Hash)
 
     value.to_s
+  end
+
+  def edit_path_for(server)
+    helpers.edit_server_path(server.name, project: server.project_path, scope: server.scope.key)
   end
 
   def headline

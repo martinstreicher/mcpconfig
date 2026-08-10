@@ -19,7 +19,7 @@ class BackupsController < ApplicationController
   private
 
   def assign_backup
-    @backup = Mcp::Backup.find(params[:id]) ||
+    @backup = Mcp::Backup.find(params.expect(:id)) ||
               raise(Mcp::NotFoundError, 'that backup is no longer on disk')
   end
 end

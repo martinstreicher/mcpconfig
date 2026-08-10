@@ -19,10 +19,7 @@ class ServersController < ApplicationController
   end
 
   def create_copy
-    requested = params.require(:target_scope).to_s
-    raise Mcp::NotFoundError, "unknown scope: #{requested}" unless Mcp::Scope.exists?(requested)
-
-    target_scope = Mcp::Scope.fetch(requested)
+    target_scope = requested_copy_scope
     target_project = params[:target_project].presence
 
     if target_scope.project_specific? && target_project.blank?
@@ -113,11 +110,18 @@ class ServersController < ApplicationController
   def parse_pairs(text)
     text.to_s.lines.filter_map do |line|
       line = line.strip
-      next if line.blank? || !line.include?('=')
+      next if line.blank? || line.exclude?('=')
 
       key, value = line.split('=', 2)
       [key.strip, value.to_s.strip]
     end.to_h
+  end
+
+  def requested_copy_scope
+    requested = params.expect(:target_scope).to_s
+    raise Mcp::NotFoundError, "unknown scope: #{requested}" unless Mcp::Scope.exists?(requested)
+
+    Mcp::Scope.fetch(requested)
   end
 
   def scoped_servers_path

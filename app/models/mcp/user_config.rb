@@ -27,9 +27,11 @@ module Mcp
     end
 
     def local_servers(project_path)
-      raw_local_servers(project_path).map do |name, config|
+      built = raw_local_servers(project_path).map do |name, config|
         Server.from_config(name, config, project_path: project_path, scope: Scope.local)
-      end.sort_by { |server| server.name.downcase }
+      end
+
+      built.sort_by { |server| server.name.downcase }
     end
 
     def parse_error

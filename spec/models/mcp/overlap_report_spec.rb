@@ -38,7 +38,7 @@ RSpec.describe Mcp::OverlapReport do
       overlap = report.overlaps.sole
 
       expect(overlap.status).to eq(:override)
-      expect(overlap.differences.map { |difference| difference[:field] }).to eq(%i[env])
+      expect(overlap.differences.pluck(:field)).to eq(%i[env])
       expect(overlap.summary).to include('Project overrides user')
     end
 

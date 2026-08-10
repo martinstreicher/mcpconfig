@@ -129,16 +129,16 @@ module McpConfig
         Pathname.new(Rails.application.config.mcp.user_config_path).expand_path
       end
 
-      # The user config filename is configurable, so it is read from settings
-      # rather than assumed to be ".claude.json".
-      def watched_basenames
-        [user_config_pathname.basename.to_s, PROJECT_CONFIG].uniq
-      end
-
       def warming_up?
         return false if @started_at.nil?
 
         Process.clock_gettime(Process::CLOCK_MONOTONIC) - @started_at < WARMUP_SECONDS
+      end
+
+      # The user config filename is configurable, so it is read from settings
+      # rather than assumed to be ".claude.json".
+      def watched_basenames
+        [user_config_pathname.basename.to_s, PROJECT_CONFIG].uniq
       end
     end
   end

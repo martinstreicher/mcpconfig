@@ -6,11 +6,8 @@
 # visible at once.
 class LocalServersController < ApplicationController
   def index
+    @groups = workspace.projects_with_local_servers
     @report = workspace.overlap_report
-    @groups = workspace.projects
-                       .reject { |project| project.local_servers.empty? }
-                       .sort_by { |project| [-project.local_servers.size, project.path.downcase] }
-    @total = @groups.sum { |project| project.local_servers.size }
-    @warned = @groups.sum { |project| project.local_servers.count { |server| server.warnings.any? } }
+    @servers = @groups.flat_map(&:local_servers)
   end
 end

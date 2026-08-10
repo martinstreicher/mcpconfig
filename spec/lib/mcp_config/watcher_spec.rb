@@ -3,29 +3,31 @@ require 'rails_helper'
 RSpec.describe McpConfig::Watcher do
   subject(:pattern) { described_class.send(:ignore_pattern) }
 
+  # `match?` is called on the pattern rather than using RSpec's `match` matcher
+  # so the value under test is a computed boolean, not a bare literal.
   describe 'the ignore pattern' do
     it 'does not silence the configured user config file' do
-      expect(user_config_path.basename.to_s).not_to match(pattern)
+      expect(pattern.match?(user_config_path.basename.to_s)).to be(false)
     end
 
     it 'does not silence a project .mcp.json' do
-      expect('.mcp.json').not_to match(pattern)
+      expect(pattern.match?('.mcp.json')).to be(false)
     end
 
     # Without this the watched root is pruned and nothing is ever reported,
     # which is exactly the bug that made watching silently do nothing.
     it 'does not silence the watched root itself' do
-      expect('.').not_to match(pattern)
+      expect(pattern.match?('.')).to be(false)
     end
 
     it 'silences subdirectories, so a home directory is never walked', :aggregate_failures do
-      expect('node_modules').to match(pattern)
-      expect('Library').to match(pattern)
-      expect('projects/deep/nested').to match(pattern)
+      expect(pattern.match?('node_modules')).to be(true)
+      expect(pattern.match?('Library')).to be(true)
+      expect(pattern.match?('projects/deep/nested')).to be(true)
     end
 
     it 'silences unrelated files in a watched directory' do
-      expect('.zshrc').to match(pattern)
+      expect(pattern.match?('.zshrc')).to be(true)
     end
   end
 

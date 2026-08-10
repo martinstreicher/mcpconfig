@@ -8,6 +8,20 @@ module ConfigFixtures
     JSON.parse(user_config_path.read)
   end
 
+  def redirect_settings_to(root)
+    settings.backup_path = root.join('backups')
+    settings.user_config_path = root.join('claude.json')
+  end
+
+  def restore_settings(original)
+    settings.backup_path = original.backup_path
+    settings.user_config_path = original.user_config_path
+  end
+
+  def settings
+    Rails.application.config.mcp
+  end
+
   def stdio_server(command: 'npx', args: [], env: {})
     { 'type' => 'stdio', 'command' => command, 'args' => args, 'env' => env }.compact_blank
   end
@@ -22,16 +36,14 @@ module ConfigFixtures
 
   def with_isolated_config
     @tmp_root = Pathname.new(Dir.mktmpdir('mcp-config-spec'))
-    original = Rails.application.config.mcp.dup
+    original = settings.dup
 
-    Rails.application.config.mcp.backup_path = @tmp_root.join('backups')
-    Rails.application.config.mcp.user_config_path = @tmp_root.join('claude.json')
-
+    redirect_settings_to(@tmp_root)
     write_user_config({})
+
     yield
   ensure
-    Rails.application.config.mcp.backup_path = original.backup_path
-    Rails.application.config.mcp.user_config_path = original.user_config_path
+    restore_settings(original)
     FileUtils.rm_rf(@tmp_root)
   end
 
