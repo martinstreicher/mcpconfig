@@ -1,0 +1,11 @@
+<div class="rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center dark:border-slate-700">
+  <p class="text-sm font-medium text-slate-700 dark:text-slate-200"><%= title %></p>
+
+  <% if description.present? %>
+    <p class="mx-auto mt-2 max-w-prose text-sm text-slate-500 dark:text-slate-400"><%= description %></p>
+  <% end %>
+
+  <% if content.present? %>
+    <div class="mt-4 flex justify-center gap-2"><%= content %></div>
+  <% end %>
+</div>

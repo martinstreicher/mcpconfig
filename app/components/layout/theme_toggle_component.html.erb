@@ -1,0 +1,11 @@
+<div class="inline-flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800" role="group" aria-label="Theme">
+  <% choices.each do |choice| %>
+    <%= button_to theme_path(theme: choice),
+                  class: button_classes(choice),
+                  data: { action: 'theme#choose', theme_choice_param: choice },
+                  form: { class: 'contents' },
+                  method: :patch do %>
+      <%= label_for(choice) %>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,11 @@
+<% content_for :title, 'Add MCP server' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: @scope.description,
+      eyebrow: @project ? @project.relative_path : 'User scope',
+      title: "Add a #{@scope.name.downcase}-scoped server"
+    ) %>
+
+<%= render Ui::CardComponent.new(accent: @scope.accent, subtitle: @scope.location, title: 'Server') do %>
+  <%= render ServerFormComponent.new(project: @project, scope: @scope, server: @server, url: servers_path) %>
+<% end %>

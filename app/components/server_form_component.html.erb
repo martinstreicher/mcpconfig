@@ -1,0 +1,98 @@
+<%= form_with class: 'space-y-5',
+              data: { controller: 'transport', transport_selected_value: server.transport },
+              method: new_record? ? :post : :patch,
+              scope: :server,
+              url: url do |form| %>
+  <%= hidden_field_tag :scope, scope.key %>
+  <%= hidden_field_tag :project, project&.path if project %>
+
+  <% if server.errors.any? %>
+    <div class="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
+      <p class="font-medium">This server could not be saved:</p>
+
+      <ul class="mt-1 list-disc pl-5">
+        <% server.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= form.label :name, 'Server name', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= form.text_field :name,
+                          autocomplete: 'off',
+                          autofocus: new_record?,
+                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          placeholder: 'postgres',
+                          value: server.name %>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Letters, numbers, dashes, dots and underscores.</p>
+    </div>
+
+    <div>
+      <%= form.label :transport, 'Transport', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= form.select :transport,
+                      transport_options,
+                      { selected: server.transport },
+                      class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                      data: { action: 'change->transport#select', transport_target: 'select' } %>
+    </div>
+  </div>
+
+  <div class="space-y-4" data-transport-target="stdio">
+    <div>
+      <%= form.label :command, 'Command', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= form.text_field :command,
+                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          placeholder: 'npx',
+                          value: server.command %>
+    </div>
+
+    <div>
+      <%= form.label :args, 'Arguments', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= form.text_area :args,
+                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                         placeholder: "-y\n@modelcontextprotocol/server-postgres",
+                         rows: 4,
+                         value: args_text %>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">One argument per line.</p>
+    </div>
+  </div>
+
+  <div class="space-y-4" data-transport-target="remote">
+    <div>
+      <%= form.label :url, 'URL', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= form.text_field :url,
+                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          placeholder: 'https://example.com/mcp',
+                          value: server.url %>
+    </div>
+
+    <div>
+      <%= form.label :headers, 'Headers', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= form.text_area :headers,
+                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                         placeholder: 'Authorization=Bearer ...',
+                         rows: 3,
+                         value: headers_text %>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">One <code>NAME=value</code> pair per line.</p>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :env, 'Environment variables', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+    <%= form.text_area :env,
+                       class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                       placeholder: "DATABASE_URL=postgres://localhost/app\nLOG_LEVEL=debug",
+                       rows: 4,
+                       value: env_text %>
+    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">One <code>NAME=value</code> pair per line.</p>
+  </div>
+
+  <div class="flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+    <%= form.submit submit_label,
+                    class: 'inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white' %>
+    <%= render Ui::ButtonComponent.new(href: cancel_path, label: 'Cancel', variant: :ghost) %>
+  </div>
+<% end %>

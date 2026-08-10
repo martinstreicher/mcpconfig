@@ -1,0 +1,23 @@
+<% content_for :title, 'Raw JSON' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: @scope.location,
+      eyebrow: @project ? @project.relative_path : 'User scope',
+      title: "#{@scope.name} scope JSON"
+    ) do |header| %>
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: edit_raw_config_path(project: @project&.path, scope: @scope.key),
+                                       label: 'Edit JSON',
+                                       variant: :primary) %>
+  <% end %>
+
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: servers_path(project: @project&.path, scope: @scope.key),
+                                       label: 'Back to servers',
+                                       variant: :ghost) %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(accent: @scope.accent, title: 'mcpServers') do %>
+  <%= render JsonBlockComponent.new(value: @document) %>
+<% end %>

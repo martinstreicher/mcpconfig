@@ -1,0 +1,11 @@
+# This is a single-process tool that runs on your own machine, so the in-process
+# async adapter is the right one everywhere. Point production at Redis only if
+# you ever run it behind more than one worker.
+development:
+  adapter: async
+
+test:
+  adapter: test
+
+production:
+  adapter: async

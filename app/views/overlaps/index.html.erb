@@ -1,0 +1,82 @@
+<% content_for :title, 'Overlaps' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Where a project defines a server name that already exists at user scope. ' \
+                   'The highest-precedence definition is the one Claude Code loads.',
+      eyebrow: 'Overlaps',
+      title: 'User and project overlaps'
+    ) %>
+
+<div class="grid gap-3 sm:grid-cols-3">
+  <%= render Ui::StatComponent.new(accent: @report.counts[:overrides].positive? ? 'rose' : 'slate',
+                                   hint: 'a project changes what runs',
+                                   href: overlaps_path(status: 'overrides'),
+                                   label: 'Overrides',
+                                   value: @report.counts[:overrides]) %>
+
+  <%= render Ui::StatComponent.new(accent: 'slate',
+                                   hint: 'identical, so redundant',
+                                   href: overlaps_path(status: 'duplicates'),
+                                   label: 'Duplicates',
+                                   value: @report.counts[:duplicates]) %>
+
+  <%= render Ui::StatComponent.new(accent: 'indigo',
+                                   hint: 'nothing shadows them',
+                                   label: 'Clean user servers',
+                                   value: @report.unshadowed_user_servers.size) %>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+  <% [['All', nil], ['Overrides', 'overrides'], ['Duplicates', 'duplicates']].each do |label, status| %>
+    <%= link_to label,
+                overlaps_path(status: status),
+                class: "rounded-lg border px-3 py-1.5 text-sm font-medium #{@filter == status ? 'border-transparent bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'}" %>
+  <% end %>
+</div>
+
+<% if @grouped.any? %>
+  <% @grouped.each do |project, overlaps| %>
+    <%= render Ui::CardComponent.new(accent: overlaps.any?(&:override?) ? 'rose' : 'slate',
+                                     subtitle: project.path,
+                                     title: project.display_name) do |card| %>
+      <% card.with_action do %>
+        <%= render Ui::ButtonComponent.new(href: project_path(path: project.path),
+                                           label: 'Open project',
+                                           variant: :ghost) %>
+      <% end %>
+
+      <div class="space-y-3">
+        <% overlaps.each do |overlap| %>
+          <%= render OverlapCardComponent.new(overlap: overlap, show_project: false) %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(
+        description: 'No project redefines a server that user scope already provides, so nothing is being shadowed.',
+        title: @filter ? "No #{@filter} to show." : 'No overlaps.'
+      ) %>
+<% end %>
+
+<%= render Ui::CardComponent.new(subtitle: 'How Claude Code resolves a name defined more than once.',
+                                 title: 'Precedence') do %>
+  <ol class="space-y-2">
+    <% Mcp::Scope.all.sort_by { |scope| -scope.precedence }.each_with_index do |scope, index| %>
+      <li class="flex items-start gap-3">
+        <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+          <%= index + 1 %>
+        </span>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <%= render ScopeBadgeComponent.new(scope: scope) %>
+            <span class="font-mono text-xs text-slate-400 dark:text-slate-500"><%= scope.location %></span>
+          </div>
+
+          <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300"><%= scope.description %></p>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+<% end %>

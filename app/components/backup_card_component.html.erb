@@ -1,0 +1,29 @@
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 first:border-t-0 dark:border-slate-800">
+  <div class="min-w-0">
+    <div class="flex items-center gap-2">
+      <p class="text-sm font-medium text-slate-800 dark:text-slate-100">
+        <%= backup.created_at.to_fs(:long) %>
+      </p>
+
+      <%= render Ui::BadgeComponent.new(accent: 'emerald', label: 'Latest') if latest %>
+    </div>
+
+    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+      <%= size_label %>
+
+      <% if backup.server_names.any? %>
+        · <%= pluralize(backup.server_names.size, 'server') %>:
+        <span class="font-mono"><%= backup.server_names.first(6).join(', ') %><%= '…' if backup.server_names.size > 6 %></span>
+      <% end %>
+    </p>
+  </div>
+
+  <div class="flex shrink-0 items-center gap-2">
+    <%= render Ui::ButtonComponent.new(href: backup_path(backup), label: 'View', variant: :ghost) %>
+
+    <%= button_to 'Restore',
+                  restore_backup_path(backup),
+                  class: 'rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800',
+                  form: { data: { turbo_confirm: "Overwrite #{backup.source_path.basename} with this backup? The current file is backed up first." } } %>
+  </div>
+</div>

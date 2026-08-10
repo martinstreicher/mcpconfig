@@ -1,0 +1,107 @@
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+
+require:
+  - rubocop-ordered_methods
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - bin/**/*
+    - tmp/**/*
+    - vendor/**/*
+    # Rails owns these templates. Linting them means fighting the generator
+    # every time the framework is upgraded.
+    - config/boot.rb
+    - config/ci.rb
+    - config/environment.rb
+    - config/environments/*.rb
+    - config/importmap.rb
+    - config/initializers/assets.rb
+    - config/initializers/content_security_policy.rb
+    - config/initializers/filter_parameter_logging.rb
+    - config/initializers/inflections.rb
+    - config/puma.rb
+    - spec/spec_helper.rb
+
+# House style: single quotes, and methods in alphabetical order within their
+# visibility section.
+#
+# Detection only. This cop's corrector re-sorts across blank lines and comments
+# and gets it wrong — on this codebase it moved `create` *below* `index` and
+# collapsed the separating blank lines. Ordering is fixed by hand.
+Layout/OrderedMethods:
+  Enabled: true
+  AutoCorrect: false
+
+# House style groups delegations together after the includes, near the top of a
+# class. This cop rewrites one-line methods into `delegate` calls wherever they
+# happen to sit, which scatters them through the class instead.
+Rails/Delegate:
+  Enabled: false
+
+# Directly contradicts Layout/OrderedMethods: this one wants RESTful order,
+# that one wants alphabetical. House style is alphabetical, so this one loses.
+Rails/ActionOrder:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: single_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+
+# A single-user tool that runs on localhost and is never translated.
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+# Mcp::Backup is a plain object with its own `all`; it is not a relation.
+Rails/RedundantActiveRecordAllMethod:
+  AllowedReceivers:
+    - Mcp::Backup
+
+# ViewComponent::Base#initialize takes no arguments and holds no state, so the
+# documented way to write a component is to skip super.
+Lint/MissingSuper:
+  Exclude:
+    - app/components/**/*
+
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 22
+
+Metrics/ClassLength:
+  Exclude:
+    - app/controllers/servers_controller.rb
+    - app/models/mcp/backup.rb
+    - app/models/mcp/server.rb
+
+Metrics/BlockLength:
+  Exclude:
+    - config/routes.rb
+    - spec/**/*
+
+RSpec/ExampleLength:
+  Max: 12
+
+RSpec/MultipleExpectations:
+  Max: 4
+
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/DescribeClass:
+  Enabled: false

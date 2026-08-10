@@ -1,0 +1,61 @@
+<% content_for :title, 'Projects' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Every project path Claude Code remembers, and the MCP servers each one defines.',
+      eyebrow: 'Projects',
+      title: 'Projects'
+    ) do |header| %>
+  <% header.with_action do %>
+    <% if params[:all].present? %>
+      <%= render Ui::ButtonComponent.new(href: projects_path, label: 'Only projects with servers', variant: :secondary) %>
+    <% else %>
+      <%= render Ui::ButtonComponent.new(href: projects_path(all: 1),
+                                         label: "Show all #{@total_count}",
+                                         variant: :secondary) %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(subtitle: 'Point the app at a directory to manage its .mcp.json.', title: 'Track a project') do %>
+  <%= form_with class: 'flex flex-wrap items-end gap-3', method: :post, url: projects_path do %>
+    <div class="min-w-0 flex-1">
+      <%= label_tag :path, 'Project directory', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= text_field_tag :path, nil,
+                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                         placeholder: '/Users/you/code/my-app' %>
+    </div>
+
+    <%= submit_tag 'Track',
+                   class: 'inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800' %>
+  <% end %>
+<% end %>
+
+<% if @projects.any? %>
+  <div data-controller="filter">
+    <div class="mb-3">
+      <input class="w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+             data-action="input->filter#apply"
+             data-filter-target="query"
+             placeholder="Filter projects…"
+             type="search">
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <% @projects.each do |project| %>
+        <div data-filter-target="item" data-filter-text="<%= project.path.downcase %>">
+          <%= render ProjectCardComponent.new(overlaps: @report.for_project(project), project: project) %>
+        </div>
+      <% end %>
+    </div>
+
+    <p class="mt-3 hidden text-sm text-slate-500 dark:text-slate-400" data-filter-target="empty">
+      No projects match that filter.
+    </p>
+  </div>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(
+        description: 'Projects appear here once they have a .mcp.json or a local server in ' \
+                     "#{Mcp::Scope.user_config_display}.",
+        title: 'No projects define MCP servers.'
+      ) %>
+<% end %>

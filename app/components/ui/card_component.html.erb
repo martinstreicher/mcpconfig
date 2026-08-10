@@ -1,0 +1,27 @@
+<section class="<%= wrapper_classes %>">
+  <% if header? %>
+    <header class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+      <div>
+        <% if title.present? %>
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200"><%= title %></h2>
+        <% end %>
+
+        <% if subtitle.present? %>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400"><%= subtitle %></p>
+        <% end %>
+      </div>
+
+      <% if actions? %>
+        <div class="flex flex-wrap items-center gap-2"><%= safe_join(actions) %></div>
+      <% end %>
+    </header>
+  <% end %>
+
+  <div class="<%= body_classes %>"><%= content %></div>
+
+  <% if footer? %>
+    <footer class="border-t border-slate-200 px-5 py-3 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+      <%= footer %>
+    </footer>
+  <% end %>
+</section>

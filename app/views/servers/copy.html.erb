@@ -1,0 +1,60 @@
+<% content_for :title, "Copy #{@server.name}" %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Copy this definition into another scope. The original is left alone.',
+      eyebrow: 'Copy server',
+      title: @server.name
+    ) %>
+
+<%= render Ui::CardComponent.new(accent: @scope.accent, title: 'Source') do %>
+  <%= render ServerCardComponent.new(server: @server) %>
+<% end %>
+
+<%= render Ui::CardComponent.new(title: 'Destination') do %>
+  <%= form_with class: 'space-y-5',
+                method: :post,
+                url: copy_server_path(@server.name, project: @project&.path, scope: @scope.key) do %>
+    <fieldset class="space-y-2">
+      <legend class="text-sm font-medium text-slate-700 dark:text-slate-200">Scope</legend>
+
+      <% @targets.each do |target| %>
+        <label class="flex cursor-pointer items-start gap-3 rounded-lg border p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 <%= accent(target.accent, :border) %>">
+          <input class="mt-1"
+                 name="target_scope"
+                 required
+                 type="radio"
+                 value="<%= target.key %>"
+                 <%= 'checked' if target == @targets.first %>>
+
+          <span class="min-w-0">
+            <span class="flex items-center gap-2">
+              <%= render ScopeBadgeComponent.new(scope: target) %>
+            </span>
+
+            <span class="mt-1 block text-sm text-slate-600 dark:text-slate-300"><%= target.description %></span>
+            <span class="mt-0.5 block font-mono text-xs text-slate-400 dark:text-slate-500"><%= target.location %></span>
+          </span>
+        </label>
+      <% end %>
+    </fieldset>
+
+    <div>
+      <%= label_tag :target_project, 'Project (for project and local scopes)',
+                    class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= select_tag :target_project,
+                     options_for_select(workspace.projects.map { |project| [project.relative_path, project.path] },
+                                        @project&.path),
+                     class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                     include_blank: '— none —' %>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ignored when copying to user scope.</p>
+    </div>
+
+    <div class="flex items-center gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+      <%= submit_tag 'Copy server',
+                     class: 'inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white' %>
+      <%= render Ui::ButtonComponent.new(href: servers_path(project: @project&.path, scope: @scope.key),
+                                         label: 'Cancel',
+                                         variant: :ghost) %>
+    </div>
+  <% end %>
+<% end %>
