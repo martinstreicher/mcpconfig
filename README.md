@@ -15,6 +15,10 @@ Rails 8, ViewComponents and Stimulus, and focused on a single engine.
   against a JSON Schema, and swapped into place atomically.
 - **Overlap detection** — finds server names defined in more than one scope for
   the same project, and says which definition actually wins.
+- **Warnings** — flags servers that are structurally valid but almost certainly
+  wrong, without blocking you from saving them.
+- **A view of local scope** — every local server across every project in one
+  place, because that scope is otherwise the hardest to see.
 - **Colour-coded scopes** — user, project and local each have a colour that is
   used consistently everywhere a server appears.
 - **Dark / light themes** — light, dark, or follow the system, rendered
@@ -39,6 +43,27 @@ Overlaps are classified rather than just listed:
 
 The same name in two *different* projects is not an overlap: they never apply at
 the same time, so it is not reported.
+
+Scope names match the Claude Code CLI deliberately — what the UI calls "local"
+is what `claude mcp add --scope local` writes. Note that local is the **default**
+when no `--scope` is passed, and that it outranks the other two, which is why
+`/local` exists as its own view.
+
+## Warnings
+
+Separate from validation. A validation error blocks a save; a warning never
+does, because Claude Code will happily store any of these and refusing to edit a
+file you already have would be unhelpful.
+
+| Code | Fires when |
+| ---- | ---------- |
+| `url_as_command` | A `stdio` server's `command` is a URL, so it cannot start. Almost always means the transport should be `http`. |
+| `ignored_headers` | `headers` set on a `stdio` server, which never sends them. |
+| `ignored_env` | `env` set on an `http`/`sse` server, which never passes it. |
+| `literal_credential` | An env name matching `token`/`secret`/`key`/`password`/`credential` holds a literal value rather than a `${VAR}` reference. |
+
+These are semantic, not structural, which is exactly why the JSON Schema cannot
+catch them: `"command": "http://..."` is a perfectly good non-empty string.
 
 ## Getting started
 

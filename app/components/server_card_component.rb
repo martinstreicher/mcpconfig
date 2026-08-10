@@ -36,7 +36,7 @@ class ServerCardComponent < ApplicationComponent
 
   # Environment values that look like credentials are masked until asked for.
   def secret?(key)
-    key.match?(/token|secret|key|password|passwd|credential/i)
+    key.match?(Mcp::Server::SECRET_NAME)
   end
 
   def transport_accent

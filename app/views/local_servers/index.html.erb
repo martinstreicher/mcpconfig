@@ -1,0 +1,75 @@
+<% content_for :title, 'Local servers' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Servers stored per project path in ~/.claude.json. They are private to you, ' \
+                   'invisible in the repository, and outrank both other scopes — and they are what ' \
+                   '`claude mcp add` writes when you do not pass --scope.',
+      eyebrow: 'Local scope',
+      title: 'Local servers'
+    ) %>
+
+<div class="grid gap-3 sm:grid-cols-3">
+  <%= render Ui::StatComponent.new(accent: 'amber',
+                                   hint: "across #{pluralize(@groups.size, 'project')}",
+                                   label: 'Local servers',
+                                   value: @total) %>
+
+  <%= render Ui::StatComponent.new(accent: @warned.positive? ? 'rose' : 'slate',
+                                   hint: 'misconfigured or storing a literal secret',
+                                   label: 'With warnings',
+                                   value: @warned) %>
+
+  <%= render Ui::StatComponent.new(accent: 'indigo',
+                                   hint: 'shadowing another scope',
+                                   href: overlaps_path,
+                                   label: 'In an overlap',
+                                   value: @report.overlaps.count { |overlap| overlap.scopes.include?(Mcp::Scope.local) }) %>
+</div>
+
+<% if @groups.any? %>
+  <div data-controller="filter">
+    <div class="mb-3">
+      <input class="w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+             data-action="input->filter#apply"
+             data-filter-target="query"
+             placeholder="Filter by project or server…"
+             type="search">
+    </div>
+
+    <div class="space-y-4">
+      <% @groups.each do |project| %>
+        <div data-filter-target="item"
+             data-filter-text="<%= [project.path, *project.local_servers.map(&:name)].join(' ').downcase %>">
+          <%= render Ui::CardComponent.new(accent: 'amber',
+                                           subtitle: project.path,
+                                           title: project.display_name) do |card| %>
+            <% card.with_action do %>
+              <%= render Ui::ButtonComponent.new(href: project_path(path: project.path),
+                                                 label: 'Open project',
+                                                 variant: :ghost) %>
+            <% end %>
+
+            <% card.with_action do %>
+              <%= render Ui::ButtonComponent.new(href: new_server_path(project: project.path, scope: 'local'),
+                                                 label: 'Add',
+                                                 variant: :secondary) %>
+            <% end %>
+
+            <%= render ServerListComponent.new(overlaps: @report.for_project(project),
+                                               servers: project.local_servers,
+                                               show_scope: false) %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <p class="mt-3 hidden text-sm text-slate-500 dark:text-slate-400" data-filter-target="empty">
+      Nothing matches that filter.
+    </p>
+  </div>
+<% else %>
+  <%= render Ui::EmptyStateComponent.new(
+        description: 'Anything added with `claude mcp add` and no --scope flag would appear here.',
+        title: 'No local-scope servers.'
+      ) %>
+<% end %>

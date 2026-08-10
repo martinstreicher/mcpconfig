@@ -24,6 +24,8 @@ Rails.application.routes.draw do
 
   resource :theme, only: :update
 
+  get 'local' => 'local_servers#index', as: :local_servers
+
   get 'overlaps' => 'overlaps#index', as: :overlaps
 
   get 'projects' => 'projects#index', as: :projects

@@ -28,6 +28,7 @@ module Layout
         { label: 'Overview', path: helpers.root_path },
         { label: 'User servers', path: helpers.servers_path(scope: 'user') },
         { label: 'Projects', path: helpers.projects_path },
+        { label: 'Local servers', path: helpers.local_servers_path },
         { badge: overlap_count, label: 'Overlaps', path: helpers.overlaps_path },
         { label: 'Backups', path: helpers.backups_path },
         { label: 'Raw JSON', path: helpers.raw_config_path(scope: 'user') }

@@ -13,6 +13,15 @@ module Mcp
     REMOTE_TRANSPORTS = %w[http sse].freeze
     TRANSPORTS = %w[stdio http sse].freeze
 
+    # Environment names that usually hold something you would rather not have
+    # sitting in a config file in the clear.
+    SECRET_NAME = /token|secret|key|password|passwd|credential/i
+
+    # A shell-style reference, which is the safe way to write the above.
+    VARIABLE_REFERENCE = /\A\$\{?\w+\}?\z/
+
+    URL_LIKE = %r{\Ahttps?://}i
+
     attribute :command, :string
     attribute :name, :string
     attribute :transport, :string, default: 'stdio'
@@ -120,11 +129,66 @@ module Mcp
       name
     end
 
+    # Structurally valid, but suspicious. See Mcp::Warning.
+    def warnings
+      [url_as_command_warning, ignored_field_warning, *literal_credential_warnings].compact
+    end
+
     private
+
+    # env is handed to a child process and headers are sent with an HTTP
+    # request, so each is silently dropped by the other transport.
+    def ignored_field_warning
+      if stdio? && headers.present?
+        return Warning.new(
+          code: :ignored_headers,
+          field: :headers,
+          message: 'Headers are only sent by http and sse servers.',
+          suggestion: 'They are ignored for a stdio server.'
+        )
+      end
+
+      return nil unless remote? && env.present?
+
+      Warning.new(
+        code: :ignored_env,
+        field: :env,
+        message: 'Environment variables are only passed to stdio servers.',
+        suggestion: 'Send credentials as headers instead.'
+      )
+    end
+
+    def literal_credential_warnings
+      env.filter_map do |key, value|
+        next unless key.match?(SECRET_NAME)
+        next if value.blank? || value.match?(VARIABLE_REFERENCE)
+
+        Warning.new(
+          code: :literal_credential,
+          field: :env,
+          message: "#{key} holds a literal value.",
+          suggestion: "Use ${#{key}} to read it from the environment instead of storing it here."
+        )
+      end
+    end
+
+    # A stdio server execs its command. A URL there fails at launch, and almost
+    # always means the transport is wrong rather than the command.
+    def url_as_command_warning
+      return nil unless stdio?
+      return nil unless command.to_s.match?(URL_LIKE)
+
+      Warning.new(
+        code: :url_as_command,
+        field: :command,
+        message: 'This is a stdio server, but its command is a URL, so it cannot start.',
+        suggestion: "Change the transport to http and move #{command} into the URL field."
+      )
+    end
 
     def url_is_http
       return if url.blank?
-      return if url.match?(%r{\Ahttps?://}i)
+      return if url.match?(URL_LIKE)
 
       errors.add(:url, 'must start with http:// or https://')
     end
