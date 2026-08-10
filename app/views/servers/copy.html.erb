@@ -14,6 +14,12 @@
   <%= form_with class: 'space-y-5',
                 method: :post,
                 url: copy_server_path(@server.name, project: @project&.path, scope: @scope.key) do %>
+    <% if @conflict %>
+      <%= render ServerConflictComponent.new(existing: @conflict,
+                                             project: @conflict_project,
+                                             scope: @conflict_scope) %>
+    <% end %>
+
     <fieldset class="space-y-2">
       <legend class="text-sm font-medium text-slate-700 dark:text-slate-200">Scope</legend>
 
@@ -24,7 +30,7 @@
                  required
                  type="radio"
                  value="<%= target.key %>"
-                 <%= 'checked' if target == @targets.first %>>
+                 <%= 'checked' if target.key == (params[:target_scope].presence || @targets.first.key) %>>
 
           <span class="min-w-0">
             <span class="flex items-center gap-2">
@@ -43,7 +49,7 @@
                     class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
       <%= select_tag :target_project,
                      options_for_select(workspace.projects.map { |project| [project.relative_path, project.path] },
-                                        @project&.path),
+                                        params[:target_project].presence || @project&.path),
                      class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                      include_blank: '— none —' %>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ignored when copying to user scope.</p>

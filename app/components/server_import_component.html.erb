@@ -1,0 +1,39 @@
+<%= render Ui::CardComponent.new(
+      subtitle: 'Anything you copied from a README works here — the fields below fill themselves in.',
+      title: 'Start from a paste'
+    ) do %>
+  <%= form_with class: 'space-y-3', method: :post, url: url do %>
+    <%= hidden_field_tag :scope, scope.key %>
+    <%= hidden_field_tag :project, project&.path if project %>
+
+    <%= text_area_tag :paste, paste,
+                      class: 'w-full rounded-lg border-slate-300 bg-white p-3 font-mono text-xs leading-relaxed ' \
+                             'shadow-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100',
+                      placeholder: ServerImportComponent::EXAMPLES.join("\n"),
+                      rows: 5,
+                      spellcheck: false %>
+
+    <% if filled_note %>
+      <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400"><%= filled_note %></p>
+    <% end %>
+
+    <% if extras_note %>
+      <p class="text-xs text-amber-600 dark:text-amber-400"><%= extras_note %></p>
+    <% end %>
+
+    <% if scope_note %>
+      <p class="text-xs text-slate-500 dark:text-slate-400"><%= scope_note %></p>
+    <% end %>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <%= submit_tag 'Read the paste',
+                     class: 'inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 ' \
+                            'text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 ' \
+                            'dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800' %>
+
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        Nothing is written until you save the form below.
+      </p>
+    </div>
+  <% end %>
+<% end %>

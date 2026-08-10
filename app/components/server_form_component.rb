@@ -3,9 +3,14 @@
 # Transport choice drives which half of the form is relevant, so the two halves
 # are both rendered and toggled client-side rather than round-tripping.
 class ServerFormComponent < ApplicationComponent
-  attr_reader :project, :scope, :server, :url
+  NAME_HINT = 'Letters, numbers, dashes, dots and underscores.'.freeze
 
-  def initialize(server:, scope:, url:, project: nil)
+  attr_reader :conflict, :existing_names, :original_name, :project, :scope, :server, :url
+
+  def initialize(server:, scope:, url:, conflict: nil, existing_names: [], original_name: nil, project: nil)
+    @conflict = conflict
+    @existing_names = existing_names
+    @original_name = original_name
     @project = project
     @scope = scope
     @server = server
@@ -20,6 +25,11 @@ class ServerFormComponent < ApplicationComponent
     helpers.servers_path(project: project&.path, scope: scope.key)
   end
 
+  # Keeping the name a server already has is not a collision with itself.
+  def collision_names
+    existing_names - [original_name].compact
+  end
+
   def env_text
     pairs_text(server.env)
   end
@@ -29,11 +39,14 @@ class ServerFormComponent < ApplicationComponent
   end
 
   def new_record?
-    server.name.blank?
+    original_name.blank?
   end
 
   def submit_label
-    new_record? ? 'Add server' : 'Save changes'
+    return "Replace #{conflict.name}" if conflict
+    return 'Save changes' unless new_record?
+
+    'Add server'
   end
 
   def transport_options

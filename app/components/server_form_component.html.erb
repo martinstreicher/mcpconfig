@@ -6,6 +6,10 @@
   <%= hidden_field_tag :scope, scope.key %>
   <%= hidden_field_tag :project, project&.path if project %>
 
+  <% if conflict %>
+    <%= render ServerConflictComponent.new(existing: conflict, project: project, scope: scope) %>
+  <% end %>
+
   <% if server.errors.any? %>
     <div class="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
       <p class="font-medium">This server could not be saved:</p>
@@ -19,15 +23,18 @@
   <% end %>
 
   <div class="grid gap-4 sm:grid-cols-2">
-    <div>
+    <div data-controller="unique-name" data-unique-name-taken-value="<%= collision_names.to_json %>">
       <%= form.label :name, 'Server name', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
       <%= form.text_field :name,
                           autocomplete: 'off',
                           autofocus: new_record?,
                           class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          data: { action: 'input->unique-name#check', unique_name_target: 'input' },
                           placeholder: 'postgres',
                           value: server.name %>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Letters, numbers, dashes, dots and underscores.</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" data-unique-name-target="hint">
+        <%= ServerFormComponent::NAME_HINT %>
+      </p>
     </div>
 
     <div>

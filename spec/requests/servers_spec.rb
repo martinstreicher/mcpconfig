@@ -111,6 +111,88 @@ RSpec.describe 'Servers' do
     end
   end
 
+  describe 'POST /servers/import' do
+    before { write_user_config({}) }
+
+    it 'fills the form in from a pasted JSON snippet without writing anything', :aggregate_failures do
+      post import_servers_path, params: {
+        paste: '{"mcpServers": {"postgres": {"command": "npx", "args": ["-y", "pg"]}}}',
+        scope: 'user'
+      }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('postgres').and include('npx')
+      expect(read_user_config).not_to have_key('mcpServers')
+    end
+
+    it 'fills the form in from a claude mcp add command' do
+      post import_servers_path, params: { paste: 'claude mcp add --transport http linear https://mcp.linear.app/mcp',
+                                          scope: 'user' }
+
+      expect(response.body).to include('linear').and include('https://mcp.linear.app/mcp')
+    end
+
+    it 'explains a paste it cannot read and still renders the form', :aggregate_failures do
+      post import_servers_path, params: { paste: '{"mcpServers": {', scope: 'user' }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(flash.now[:alert]).to start_with('That is not valid JSON')
+    end
+
+    it 'honours a scope the pasted command asks for' do
+      post import_servers_path, params: { paste: 'claude mcp add -s user postgres -- npx', scope: 'user' }
+
+      expect(response.body).to include('as the command asked')
+    end
+  end
+
+  describe 'replacing a name that is already taken' do
+    before { write_user_config('mcpServers' => { 'postgres' => stdio_server(command: 'npx') }) }
+
+    it 'refuses the first attempt and leaves the definition alone', :aggregate_failures do
+      post servers_path, params: { scope: 'user', server: { command: 'bunx', name: 'postgres' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('already has a server called postgres')
+      expect(read_user_config.dig('mcpServers', 'postgres', 'command')).to eq('npx')
+    end
+
+    it 'goes through once the replacement is confirmed' do
+      post servers_path, params: { replace: '1', scope: 'user', server: { command: 'bunx', name: 'postgres' } }
+
+      expect(read_user_config.dig('mcpServers', 'postgres', 'command')).to eq('bunx')
+    end
+
+    it 'refuses a rename onto another existing name', :aggregate_failures do
+      write_user_config('mcpServers' => { 'keep' => stdio_server(command: 'npx'),
+                                          'postgres' => stdio_server(command: 'bunx') })
+
+      patch server_path('postgres', scope: 'user'), params: { scope: 'user', server: { command: 'bunx', name: 'keep' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(read_user_config['mcpServers'].keys).to eq(%w[keep postgres])
+    end
+
+    it 'refuses a copy that would land on an existing name', :aggregate_failures do
+      project.join('.mcp.json').write(JSON.generate('mcpServers' => { 'postgres' => stdio_server(command: 'uvx') }))
+      write_user_config('mcpServers' => { 'postgres' => stdio_server(command: 'npx') },
+                        'projects' => { project.to_s => {} })
+
+      post copy_server_path('postgres', scope: 'user'),
+           params: { target_project: project.to_s, target_scope: 'project' }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(JSON.parse(project_config_path(project).read).dig('mcpServers', 'postgres', 'command')).to eq('uvx')
+    end
+
+    it 'lets an editor keep its own name' do
+      patch server_path('postgres', scope: 'user'),
+            params: { scope: 'user', server: { command: 'bunx', name: 'postgres' } }
+
+      expect(read_user_config.dig('mcpServers', 'postgres', 'command')).to eq('bunx')
+    end
+  end
+
   describe 'PATCH /servers/:name' do
     before { write_user_config('mcpServers' => { 'postgres' => stdio_server(command: 'npx') }) }
 

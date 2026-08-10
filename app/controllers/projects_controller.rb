@@ -17,8 +17,8 @@ class ProjectsController < ApplicationController
 
   def show
     @project = workspace.project(params.expect(:path))
+    @effective = workspace.effective_config(@project)
     @overlaps = workspace.overlap_report.for_project(@project)
-    @user_servers = workspace.user_servers
   end
 
   private

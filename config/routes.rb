@@ -11,6 +11,12 @@ Rails.application.routes.draw do
     resources :servers, only: %i[index new create edit update destroy],
                         constraints: { name: %r{[^/]+} },
                         param: :name do
+      collection do
+        # Fills the add form in from pasted text. It reads rather than writes,
+        # but the paste is a body, not a query string, so it posts.
+        post :import
+      end
+
       member do
         get :copy
         post :copy, action: :create_copy

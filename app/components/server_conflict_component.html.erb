@@ -1,0 +1,16 @@
+<div class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/40">
+  <p class="text-sm font-medium text-amber-900 dark:text-amber-100"><%= title %></p>
+
+  <p class="mt-1 font-mono text-xs text-amber-800 dark:text-amber-200/80"><%= summary %></p>
+
+  <p class="mt-2 text-sm text-amber-900 dark:text-amber-200">
+    Saving replaces it. Change the name to keep both, or
+    <%= link_to 'open the one that is already there', existing_path, class: 'underline' %>.
+    A backup of the file is taken either way.
+  </p>
+
+  <label class="mt-3 flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-100">
+    <%= check_box_tag :replace, '1', false, class: 'rounded border-amber-400 text-amber-600 focus:ring-amber-500' %>
+    Replace <span class="font-mono"><%= existing.name %></span>
+  </label>
+</div>
