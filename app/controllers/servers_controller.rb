@@ -34,11 +34,15 @@ class ServersController < ApplicationController
                 notice: "Copied #{@server.name} into #{target_scope.name.downcase} scope."
   end
 
+  # Removal is offered from the overlaps page and from a project page as well as
+  # from the server lists, so it returns where it was asked for. Being sent to a
+  # different page than the one you were reading is how you lose your place in a
+  # list of overlaps you are working through.
   def destroy
     workspace.delete_server(@server.name, project_path: @project&.path, scope: @scope)
     Mcp::ChangeLog.record([source_path], source: :app)
 
-    redirect_to scoped_servers_path, notice: "Removed #{@server.name}."
+    redirect_back_or_to scoped_servers_path, allow_other_host: false, notice: "Removed #{@server.name}."
   end
 
   def edit; end
