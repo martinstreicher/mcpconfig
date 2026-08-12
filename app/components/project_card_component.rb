@@ -1,9 +1,10 @@
 # A project summarised: how many servers it defines in each scope, and whether
 # any of them collide with the user-scoped ones.
 class ProjectCardComponent < ApplicationComponent
-  attr_reader :overlaps, :project
+  attr_reader :ignorable, :overlaps, :project
 
-  def initialize(project:, overlaps: [])
+  def initialize(project:, ignorable: true, overlaps: [])
+    @ignorable = ignorable
     @overlaps = overlaps
     @project = project
   end
@@ -17,6 +18,14 @@ class ProjectCardComponent < ApplicationComponent
 
   def duplicates
     overlaps.select(&:duplicate?)
+  end
+
+  def ignorable?
+    ignorable
+  end
+
+  def ignore_path
+    helpers.ignores_path
   end
 
   def missing_directory?

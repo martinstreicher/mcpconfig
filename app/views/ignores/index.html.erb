@@ -1,0 +1,115 @@
+<% content_for :title, 'Ignore list' %>
+
+<%= render Ui::PageHeaderComponent.new(
+      description: 'Project directories left out of every listing. Nothing here changes a config file — ' \
+                   'an ignored project keeps its servers and Claude Code keeps loading them.',
+      eyebrow: 'Projects',
+      title: 'Ignore list'
+    ) do |header| %>
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(href: projects_path, label: 'Back to projects', variant: :secondary) %>
+  <% end %>
+<% end %>
+
+<%= render Ui::CardComponent.new(subtitle: 'One pattern at a time, in .gitignore syntax.', title: 'Add a pattern') do %>
+  <%= form_with class: 'flex flex-wrap items-end gap-3', method: :post, url: ignores_path do %>
+    <div class="min-w-0 flex-1">
+      <%= label_tag :pattern, 'Pattern', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
+      <%= text_field_tag :pattern, nil,
+                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                         placeholder: '~/scratch or node_modules or ~/code/*/vendor' %>
+    </div>
+
+    <%= submit_tag 'Ignore',
+                   class: 'inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800' %>
+  <% end %>
+
+  <dl class="mt-4 grid gap-x-4 gap-y-1 text-xs sm:grid-cols-[max-content_1fr]">
+    <dt class="font-mono text-slate-500 dark:text-slate-400">node_modules</dt>
+    <dd class="text-slate-600 dark:text-slate-300">any directory of that name, at any depth</dd>
+
+    <dt class="font-mono text-slate-500 dark:text-slate-400">~/scratch</dt>
+    <dd class="text-slate-600 dark:text-slate-300">one directory, and everything under it</dd>
+
+    <dt class="font-mono text-slate-500 dark:text-slate-400">~/code/*/vendor</dt>
+    <dd class="text-slate-600 dark:text-slate-300"><span class="font-mono">*</span> matches within one directory name</dd>
+
+    <dt class="font-mono text-slate-500 dark:text-slate-400">~/experiments/**</dt>
+    <dd class="text-slate-600 dark:text-slate-300"><span class="font-mono">**</span> matches across directory names</dd>
+
+    <dt class="font-mono text-slate-500 dark:text-slate-400">!~/scratch/keep</dt>
+    <dd class="text-slate-600 dark:text-slate-300">an exception to a pattern above; the last match wins</dd>
+  </dl>
+
+  <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">
+    Matching ignores case, and a pattern with no slash matches a directory name at any depth. Stored in
+    <span class="font-mono"><%= @ignore_list.path %></span>, which you can edit by hand.
+  </p>
+<% end %>
+
+<%= render Ui::CardComponent.new(subtitle: "#{pluralize(@visible_count, 'project')} still listed.",
+                                 title: 'Patterns') do %>
+  <% if @ignore_list.file_patterns.any? %>
+    <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+      <% @ignore_list.file_patterns.each do |pattern| %>
+        <li class="flex items-center justify-between gap-3 py-2">
+          <span class="min-w-0 truncate font-mono text-sm text-slate-700 dark:text-slate-200"><%= pattern %></span>
+
+          <%= button_to 'Remove',
+                        ignores_path,
+                        class: 'shrink-0 rounded-lg border border-transparent px-3 py-1 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50',
+                        method: :delete,
+                        params: { pattern: pattern } %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= render Ui::EmptyStateComponent.new(
+          description: 'Add one above, or press Ignore on any project card.',
+          title: 'Nothing is being ignored.'
+        ) %>
+  <% end %>
+
+  <% if @ignore_list.environment_patterns.any? %>
+    <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/60">
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+        From MCP_CONFIG_IGNORE
+      </p>
+
+      <p class="mt-1 font-mono text-xs text-slate-600 dark:text-slate-300">
+        <%= @ignore_list.environment_patterns.join(', ') %>
+      </p>
+
+      <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
+        Set in the environment, so it is changed there rather than here.
+      </p>
+    </div>
+  <% end %>
+<% end %>
+
+<% if @ignored_projects.any? %>
+  <%= render Ui::CardComponent.new(accent: 'amber',
+                                   subtitle: 'Remembered by Claude Code, hidden here.',
+                                   title: "#{pluralize(@ignored_projects.size, 'hidden project')}") do %>
+    <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+      <% @ignored_projects.each do |project| %>
+        <li class="flex items-center justify-between gap-3 py-2">
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium text-slate-700 dark:text-slate-200"><%= project.display_name %></p>
+
+            <p class="truncate font-mono text-xs text-slate-500 dark:text-slate-400" title="<%= project.path %>">
+              <%= project.relative_path %>
+            </p>
+          </div>
+
+          <%= button_to 'Show again',
+                        ignores_path,
+                        class: 'shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800',
+                        method: :delete,
+                        params: { path: project.path },
+                        title: 'Drops the pattern that named it, or adds an exception when a wildcard caught it.' %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

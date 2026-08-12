@@ -13,6 +13,7 @@ class ProjectsController < ApplicationController
     @projects = @projects.sort_by { |project| [-project.server_count, project.path.downcase] }
     @report = workspace.overlap_report
     @total_count = workspace.projects.size
+    @ignored_count = workspace.ignored_projects.size
   end
 
   def show
