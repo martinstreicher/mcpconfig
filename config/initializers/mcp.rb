@@ -27,6 +27,16 @@ Rails.application.config.mcp.tap do |mcp|
   # Project directories watched for a .mcp.json. Watching is cheap per directory
   # but not free, so the list is capped.
   mcp.max_watched_projects = Integer(ENV.fetch('MCP_CONFIG_MAX_WATCHED_PROJECTS', 200))
+
+  # Project directories left out of every listing, one .gitignore-style pattern
+  # per line. See Mcp::IgnoreList.
+  mcp.ignore_file =
+    Pathname.new(ENV.fetch('MCP_CONFIG_IGNORE_FILE', File.join(Dir.home, '.mcp-config', 'ignore')))
+
+  # The same patterns, from the environment, for a container or a shared machine
+  # that should not have to ship the file. Colon or newline separated.
+  mcp.ignore_patterns =
+    ENV.fetch('MCP_CONFIG_IGNORE', '').split(/[:\n]/).map(&:strip).compact_blank
 end
 
 require Rails.root.join('lib/mcp_config/watcher')

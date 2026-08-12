@@ -96,7 +96,7 @@
   <% end %>
 
   <% if @projects.any? %>
-    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <div class="grid auto-rows-fr gap-3 md:grid-cols-2 xl:grid-cols-3">
       <% @projects.first(9).each do |project| %>
         <%= render ProjectCardComponent.new(overlaps: @overlap_report.for_project(project), project: project) %>
       <% end %>

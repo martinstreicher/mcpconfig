@@ -34,6 +34,12 @@
           <% end %>
 
           <%= link_to 'Edit', edit_path_for(server), class: 'text-xs text-slate-500 underline hover:text-slate-800 dark:hover:text-slate-200' %>
+
+          <%= button_to 'Remove',
+                        delete_path_for(server),
+                        class: removal_classes(server),
+                        form: { data: { turbo_confirm: removal_confirmation(server) } },
+                        method: :delete %>
         </div>
       </div>
     <% end %>

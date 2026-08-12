@@ -89,6 +89,17 @@ Metrics/ClassLength:
     # A parser for three input shapes. Splitting it by shape would mean three
     # classes that only ever run one after another behind the same entry point.
     - app/models/mcp/server_import.rb
+    # Pattern matching already lives in Mcp::IgnoreList::Rule. What is left is the
+    # file it reads and the four edits it supports, and a fifteen-line syntax
+    # header that is worth more in the file it writes than it costs here.
+    - app/models/mcp/ignore_list.rb
+
+# Mcp::IgnoreList#add, #remove and #unignore are commands that report whether they
+# changed anything, the way Hash#delete and Array#reject! do. A question mark
+# would describe them as questions, which is the opposite of what they are.
+Naming/PredicateMethod:
+  Exclude:
+    - app/models/mcp/ignore_list.rb
 
 # Keyword arguments name themselves at the call site, which is the readability
 # problem this cop exists to catch. Positional lists are still held to five.

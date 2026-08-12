@@ -14,6 +14,14 @@
                                          variant: :secondary) %>
     <% end %>
   <% end %>
+
+  <% header.with_action do %>
+    <%= render Ui::ButtonComponent.new(
+          href: ignores_path,
+          label: @ignored_count.positive? ? "Ignored (#{@ignored_count})" : 'Ignore list',
+          variant: :ghost
+        ) %>
+  <% end %>
 <% end %>
 
 <%= render Ui::CardComponent.new(subtitle: 'Point the app at a directory to manage its .mcp.json.', title: 'Track a project') do %>
@@ -40,9 +48,9 @@
              type="search">
     </div>
 
-    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <div class="grid auto-rows-fr gap-3 md:grid-cols-2 xl:grid-cols-3">
       <% @projects.each do |project| %>
-        <div data-filter-target="item" data-filter-text="<%= project.path.downcase %>">
+        <div class="h-full" data-filter-target="item" data-filter-text="<%= project.path.downcase %>">
           <%= render ProjectCardComponent.new(overlaps: @report.for_project(project), project: project) %>
         </div>
       <% end %>

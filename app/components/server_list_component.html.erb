@@ -14,9 +14,9 @@
       </div>
     <% end %>
 
-    <div class="grid gap-3 md:grid-cols-2">
+    <div class="grid auto-rows-fr gap-3 md:grid-cols-2">
       <% servers.each do |server| %>
-        <div data-filter-target="item" data-filter-text="<%= [server.name, server.summary, server.scope.name].join(' ').downcase %>">
+        <div class="h-full" data-filter-target="item" data-filter-text="<%= [server.name, server.summary, server.scope.name].join(' ').downcase %>">
           <%= render ServerCardComponent.new(overlap: overlap_for(server), server: server, show_scope: show_scope) %>
         </div>
       <% end %>

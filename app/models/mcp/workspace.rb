@@ -47,6 +47,16 @@ module Mcp
         raise(NotFoundError, "no #{scope} MCP server named #{name.inspect}")
     end
 
+    def ignore_list
+      @ignore_list ||= IgnoreList.current
+    end
+
+    # The projects the ignore list is holding back. Listed so a hidden project is
+    # never hidden without a way to find it again.
+    def ignored_projects
+      @ignored_projects ||= ignore_list.ignored(user_config.project_paths).map { |path| project(path) }
+    end
+
     def overlap_report
       @overlap_report ||= OverlapReport.new(self)
     end
@@ -59,8 +69,10 @@ module Mcp
       project(path).config_file
     end
 
+    # Every remembered project except the ignored ones. This is the choke point
+    # the whole UI reads through, so ignoring a directory hides it everywhere.
     def projects
-      @projects ||= user_config.project_paths.map { |path| project(path) }
+      @projects ||= ignore_list.keep(user_config.project_paths).map { |path| project(path) }
     end
 
     # Projects that define at least one local-scope server, busiest first.

@@ -38,6 +38,12 @@ Rails.application.routes.draw do
   post 'projects' => 'projects#create'
   get 'projects/show' => 'projects#show', as: :project
 
+  # A pattern travels as a parameter for the same reason a project path does: it
+  # is filesystem text, slashes and all, and does not belong in a URL segment.
+  get 'ignored' => 'ignores#index', as: :ignores
+  post 'ignored' => 'ignores#create'
+  delete 'ignored' => 'ignores#destroy'
+
   get 'raw' => 'raw_configs#show', as: :raw_config
   get 'raw/edit' => 'raw_configs#edit', as: :edit_raw_config
   patch 'raw' => 'raw_configs#update'

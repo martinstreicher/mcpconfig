@@ -109,11 +109,15 @@ module McpConfig
         Rails.logger.error("[mcp] watcher callback failed: #{e.class}: #{e.message}")
       end
 
+      # Ignored projects are skipped here too: a directory nothing will display is
+      # a watch nobody needs, and it frees a slot under the cap.
       def project_directories
         config = Mcp::UserConfig.new
         return [] unless config.exist?
 
-        config.project_paths.map { |path| Pathname.new(path) }.select(&:directory?)
+        paths = Mcp::IgnoreList.current.keep(config.project_paths)
+
+        paths.map { |path| Pathname.new(path) }.select(&:directory?)
       rescue StandardError => e
         Rails.logger.warn("[mcp] could not enumerate project directories: #{e.message}")
         []
