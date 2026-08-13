@@ -27,7 +27,7 @@ module Ui
 
     def wrapper_classes
       [
-        'rounded-xl border bg-white shadow-sm dark:bg-slate-900/60',
+        'rounded-xl border bg-white shadow-xs dark:bg-slate-900/60',
         accent(accent_name, :border)
       ].join(' ')
     end

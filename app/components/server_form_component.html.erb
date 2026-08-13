@@ -28,7 +28,7 @@
       <%= form.text_field :name,
                           autocomplete: 'off',
                           autofocus: new_record?,
-                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                           data: { action: 'input->unique-name#check', unique_name_target: 'input' },
                           placeholder: 'postgres',
                           value: server.name %>
@@ -42,7 +42,7 @@
       <%= form.select :transport,
                       transport_options,
                       { selected: server.transport },
-                      class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                      class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                       data: { action: 'change->transport#select', transport_target: 'select' } %>
     </div>
   </div>
@@ -51,7 +51,7 @@
     <div>
       <%= form.label :command, 'Command', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
       <%= form.text_field :command,
-                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                           placeholder: 'npx',
                           value: server.command %>
     </div>
@@ -59,7 +59,7 @@
     <div>
       <%= form.label :args, 'Arguments', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
       <%= form.text_area :args,
-                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                          placeholder: "-y\n@modelcontextprotocol/server-postgres",
                          rows: 4,
                          value: args_text %>
@@ -71,7 +71,7 @@
     <div>
       <%= form.label :url, 'URL', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
       <%= form.text_field :url,
-                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                          class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                           placeholder: 'https://example.com/mcp',
                           value: server.url %>
     </div>
@@ -79,7 +79,7 @@
     <div>
       <%= form.label :headers, 'Headers', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
       <%= form.text_area :headers,
-                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                         class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                          placeholder: 'Authorization=Bearer ...',
                          rows: 3,
                          value: headers_text %>
@@ -90,7 +90,7 @@
   <div>
     <%= form.label :env, 'Environment variables', class: 'block text-sm font-medium text-slate-700 dark:text-slate-200' %>
     <%= form.text_area :env,
-                       class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                       class: 'mt-1 w-full rounded-lg border-slate-300 font-mono text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                        placeholder: "DATABASE_URL=postgres://localhost/app\nLOG_LEVEL=debug",
                        rows: 4,
                        value: env_text %>
