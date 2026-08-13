@@ -14,7 +14,7 @@ module Layout
       base = 'rounded-md px-2 py-1 text-xs font-medium transition-colors'
 
       if choice == current
-        "#{base} bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-50"
+        "#{base} bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-slate-50"
       else
         "#{base} text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
       end

@@ -36,7 +36,7 @@ module Ui
     def classes
       [
         'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium',
-        'transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1',
+        'transition-colors focus:outline-hidden focus:ring-2 focus:ring-slate-400 focus:ring-offset-1',
         'dark:focus:ring-offset-slate-900',
         VARIANTS.fetch(variant.to_sym, VARIANTS[:secondary]),
         options[:class]

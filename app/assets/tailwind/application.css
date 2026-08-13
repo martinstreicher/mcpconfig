@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/forms";
+
+/* Tailwind 4 finds sources on its own, but the globs are spelled out so a new
+   directory of templates cannot go unscanned without someone noticing. */
+@source "../../components/**/*.{erb,rb}";
+@source "../../helpers/**/*.rb";
+@source "../../javascript/**/*.js";
+@source "../../views/**/*.erb";
+
+/* Dark mode is class-driven so the server can render the right theme on the
+   first paint instead of waiting for a media query to settle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    'Noto Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+}
+
+@layer base {
+  /* Tailwind 4 defaults an uncoloured border to currentColor; Tailwind 3 used
+     gray-200. Ten class lists in this app rely on the old default, so it is
+     restored here rather than spelled out at each of those call sites. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  code,
+  pre {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+}
+
+@layer components {
+  /* Form controls come from @tailwindcss/forms; these pull them into the palette
+     the rest of the app uses so every input matches without repeating a dozen
+     utility classes at each call site. */
+  input[type="text"],
+  input[type="search"],
+  select,
+  textarea {
+    @apply border-slate-300 text-slate-900 placeholder:text-slate-400;
+    @apply focus:border-slate-500 focus:ring-slate-500;
+  }
+
+  .dark input[type="text"],
+  .dark input[type="search"],
+  .dark select,
+  .dark textarea {
+    @apply border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500;
+    @apply focus:border-slate-400 focus:ring-slate-400;
+  }
+}

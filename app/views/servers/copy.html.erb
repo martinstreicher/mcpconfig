@@ -50,7 +50,7 @@
       <%= select_tag :target_project,
                      options_for_select(workspace.projects.map { |project| [project.relative_path, project.path] },
                                         params[:target_project].presence || @project&.path),
-                     class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                     class: 'mt-1 w-full rounded-lg border-slate-300 text-sm shadow-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100',
                      include_blank: '— none —' %>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ignored when copying to user scope.</p>
     </div>
