@@ -2,6 +2,13 @@ source 'https://rubygems.org'
 
 gem 'bootsnap', require: false
 gem 'importmap-rails'
+
+# json 3.0 dropped the positional options hash from JSON.parse, which
+# ActiveSupport::JSON.decode still passes. That breaks every signed or encrypted
+# message Rails reads back, the session cookie included. Unpin once Rails ships
+# a version that calls JSON.parse with keywords.
+gem 'json', '< 3'
+
 gem 'json-schema'
 gem 'listen'
 gem 'propshaft'
